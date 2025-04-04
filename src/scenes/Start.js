@@ -4,12 +4,13 @@ est. 10h
 Angela Huang
 
 to-do:
-() [feat] add dice
-
-() [enhance] update card directions to be black
-() [dev] add to github & move to vscode?
-() [feat] add help/info for winning elements
-() [dev/enhance] direction message for win by 4 elements of a direction
+ () [feat] add help/info for winning elements & other useful text
+ () [feat] all element tile
+ () [feat] add dice, movement, spawn
+ () [dev/enhance] direction message for win by 4 elements of a direction
+ () [art] create accessories for frogs + more colours?
+ () [feat] customize character on menu screen
+ () [feat] multiplayer
 
 completed:
 (x) implement fight function to compare cards
@@ -24,6 +25,8 @@ completed:
 (x) [bug] unrender computer collection when not fighting
 (x) [feat] add win condition
 (x) [bug] tie rematch does not work
+(x) [dev] add to github & move to vscode
+(x) [enhance] update card directions to be black
 */
 
 import { Elements, Directions, Player, Fight } from './Common.js';

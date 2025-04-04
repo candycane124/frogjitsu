@@ -66,7 +66,7 @@ export class Player {
         const elements = [Elements.FIRE, Elements.AIR, Elements.WATER, Elements.EARTH];
         const directions = [Directions.NORTH, Directions.EAST, Directions.SOUTH, Directions.WEST];
         
-        for (let value = 8; value <= 8; value++) {
+        for (let value = 2; value <= 8; value++) {
             for (let element of elements) {
                 for (let direction of directions) {
                     let card = this.#createCard(scene,value,element,direction);
@@ -170,7 +170,6 @@ export class Player {
         const totalWidth = 4 * squareSize + 3 * GAP;
         x = x - totalWidth/2;
 
-        // this.scene.rectangles = [];
         this.collectionObjects = []; 
 
         const directions = ["N","E","S","W"];
@@ -192,7 +191,7 @@ export class Player {
                     align: 'center'
                 }).setOrigin(0.5,1);
             }
-            // this.scene.rectangles.push(this.createFourSquare(x + (squareSize + GAP) * i, y, squareSize, this.collection[i]));
+            
             this.collectionObjects.push(text);
 
             const squares = this.createFourSquare(
@@ -208,7 +207,7 @@ export class Player {
     
     destroyCollection() {
         this.collectionObjects.forEach(obj => {
-            if (obj && obj.destroy) obj.destroy(); // Ensure object exists and has a destroy method
+            if (obj && obj.destroy) obj.destroy();
         });
         this.collectionObjects = [];
     }
@@ -266,12 +265,6 @@ export class Player {
                 break;
             }
         }
-        // this.collection = [
-        //     { [Elements.FIRE]: 0, [Elements.AIR]: 0, [Elements.WATER]: 0, [Elements.EARTH]: 0 },
-        //     { [Elements.FIRE]: 0, [Elements.AIR]: 0, [Elements.WATER]: 0, [Elements.EARTH]: 0 },
-        //     { [Elements.FIRE]: 0, [Elements.AIR]: 0, [Elements.WATER]: 0, [Elements.EARTH]: 0 },
-        //     { [Elements.FIRE]: 0, [Elements.AIR]: 0, [Elements.WATER]: 0, [Elements.EARTH]: 0 }
-        // ];
         return avatarWin || masterWin;
     }
 }
