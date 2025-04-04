@@ -22,7 +22,7 @@ const CARD_WIDTH = 96;
 const GAP = 16;
 
 export class Player {
-    constructor(name,scene,equipX,equipY = 336, handSize = 7) {
+    constructor(name,frog,scene,equipX,equipY = 336,handSize = 7, x = 0, y = 0) {
         this.name = name;
         // this.avatar = avatar;
         this.scene = scene;
@@ -42,6 +42,15 @@ export class Player {
         this.equipped = null;
         this.equipX = equipX;
         this.equipY = equipY;
+        this.character = scene.add.image(x,y,frog).setScale(0.09);
+    }
+
+    moveCharacter(x,y) {
+        this.character.setPosition(x,y);
+    }
+
+    setCharacterVisible(visible) {
+        this.character.setVisible(visible);
     }
 
     #createCard(scene, value, element, direction, x = 0, y = 0) {

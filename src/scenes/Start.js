@@ -6,9 +6,10 @@ Angela Huang
 to-do:
  () [feat] add help/info for winning elements & other useful text
  () [feat] all element tile
- () [feat] add dice, movement, spawn
+ () [feat] add movement, dice, spawn
  () [dev/enhance] direction message for win by 4 elements of a direction
  () [art] create accessories for frogs + more colours?
+ () [art/feat] gray frog for computer
  () [feat] customize character on menu screen
  () [feat] multiplayer
 
@@ -69,12 +70,13 @@ export class Start extends Phaser.Scene
 
     create()
     {
-        this.add.image(850, 550, this.selectedFrog).setScale(SPACE_SCALE/1.5);
+        // this.add.image(850, 550, this.selectedFrog).setScale(SPACE_SCALE/1.5);
 
         this.#generateBoard();
 
-        this.p1 = new Player("candycane123",this,768);
-        this.p2 = new Player("Computer",this,160);
+        this.p1 = new Player("candycane123",this.selectedFrog,this,768,336,7,850,550);
+        this.p2 = new Player("Computer",'frog-blue',this,160);
+
 
         console.log(this.p1);
         console.log(this.p2);
@@ -82,8 +84,10 @@ export class Start extends Phaser.Scene
         this.p1.renderHand(PLAYER_HAND_X,PLAYER_HAND_Y,false);
         this.p1.renderCollection(PLAYER_HAND_X,PLAYER_COLLECTION_Y,1);
 
-        // this.fightInProgress = false;
-        // this.#createClickEvents();
+        this.fightInProgress = false;
+        // this.input.on('pointerdown', (pointer) => {
+        //     this.p1.moveCharacter(pointer.x,pointer.y);
+        // });
     }
 
     #generateBoard() {
@@ -112,9 +116,11 @@ export class Start extends Phaser.Scene
                     "spaceElement": currentElement
                 });
                 space.on('pointerdown', () => {
+                    this.p1.moveCharacter(anchorX+SPACE_SIZE*j,anchorY+SPACE_SIZE*i);
                     console.log(`Clicked on space with element: ${currentElement}`);
                     this.spaceElement = currentElement;
                     this.#startFightScene();
+                    this.p1.setCharacterVisible(false);
                 });
             }
         }
@@ -130,11 +136,22 @@ export class Start extends Phaser.Scene
 
     #startFightScene() {
         console.log("Fight scene initializing...");
+
+        let bgcolours = {
+            'fire': "0xEAA",
+            'earth': "0xAEA",
+            'water': "0xAAE",
+            'air': "0xEEA"
+        }
+
+        this.cameras.main.setBackgroundColor(bgcolours[this.spaceElement]);
+
         this.#showBoard(false);
 
         this.p1.renderHand(PLAYER_HAND_X, PLAYER_HAND_Y, true);
         this.p2.renderHand(PLAYER_HAND_X, 96, false);
         this.p2.renderCollection(PLAYER_HAND_X,156,0);
+
     }
 
     #triggerFight() {
@@ -179,8 +196,10 @@ export class Start extends Phaser.Scene
         if (this.p1.checkWin()) {
             this.scene.start('End', { won: true });
         }
-        if (this.p2.checkWin()) {
+        else if (this.p2.checkWin()) {
             this.scene.start('End', { won: false });
+        } else {
+            this.p1.setCharacterVisible(true);
         }
     }
 
@@ -194,5 +213,7 @@ export class Start extends Phaser.Scene
                 this.#triggerFight();
             },this);
         }
+
+        
     }
 }
