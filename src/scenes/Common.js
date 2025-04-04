@@ -1,0 +1,322 @@
+export const Elements = {
+    FIRE: 'fire',
+    AIR: 'air',
+    WATER: 'water',
+    EARTH: 'earth',
+    ALL: 'all',
+    NONE: 'none'
+};
+
+export const Directions = {
+    NORTH: 'north',
+    EAST: 'east',
+    SOUTH: 'south',
+    WEST: 'west'
+};
+
+export class Frog {
+
+};
+
+const CARD_WIDTH = 96;
+const GAP = 16;
+
+export class Player {
+    constructor(name,scene,equipX,equipY = 336, handSize = 7) {
+        this.name = name;
+        // this.avatar = avatar;
+        this.scene = scene;
+        this.deck = this.#createStartingDeck(scene);
+        this.handSize = handSize;
+        this.hand = [];
+        for (let i = 0; i < this.handSize; i++) {
+            this.drawCard();
+        }
+        this.collection = [
+            { [Elements.FIRE]: 0, [Elements.AIR]: 0, [Elements.WATER]: 0, [Elements.EARTH]: 0 },
+            { [Elements.FIRE]: 0, [Elements.AIR]: 0, [Elements.WATER]: 0, [Elements.EARTH]: 0 },
+            { [Elements.FIRE]: 0, [Elements.AIR]: 0, [Elements.WATER]: 0, [Elements.EARTH]: 0 },
+            { [Elements.FIRE]: 0, [Elements.AIR]: 0, [Elements.WATER]: 0, [Elements.EARTH]: 0 }
+        ];
+        this.coins = 0;
+        this.equipped = null;
+        this.equipX = equipX;
+        this.equipY = equipY;
+    }
+
+    #createCard(scene, value, element, direction, x = 0, y = 0) {
+        let baseNum = scene.add.image(0,0,'card-'+value.toString()).setScale(0.09375).setOrigin(0,0);
+        let elementIcon = scene.add.image(0,0,'card-'+element).setScale(0.09375).setOrigin(0,0);
+        let directionMarker = scene.add.image(0,0,'card-'+direction).setScale(0.09375).setOrigin(0,0);
+
+        let cardGroup = scene.add.container(x, y).setData({
+            "value": value,
+            "element": element,
+            "direction": direction
+        }).setVisible(false);
+        cardGroup.add([baseNum, elementIcon, directionMarker]);
+
+        cardGroup.baseNum = baseNum;
+
+        return cardGroup;
+    };
+
+    #createStartingDeck(scene) {
+        let deck = [];
+        const elements = [Elements.FIRE, Elements.AIR, Elements.WATER, Elements.EARTH];
+        const directions = [Directions.NORTH, Directions.EAST, Directions.SOUTH, Directions.WEST];
+        
+        for (let value = 8; value <= 8; value++) {
+            for (let element of elements) {
+                for (let direction of directions) {
+                    let card = this.#createCard(scene,value,element,direction);
+                    // let card = scene.add.image(0,0,'card-'+value.toString()).setScale(0.09375).setOrigin(0,0).setInteractive({
+                    //                 draggable: true
+                    //             }).setData({
+                    //                 "value": value,
+                    //                 "element": element,
+                    //                 "direction": direction
+                    //             }).setVisible(false);
+                    deck.push(card);
+                }
+            }
+        }
+        return deck;
+    }
+
+    drawCard() {
+        if (this.deck.length > 0 && this.hand.length < this.handSize) {
+            // console.log(this.name + " is drawing card...");
+            const randomIndex = Math.floor(Math.random() * this.deck.length);
+            const drawnCard = this.deck.splice(randomIndex, 1)[0];
+            this.hand.push(drawnCard);
+        }
+    }
+
+    equipCard(card) {
+        const i = this.hand.indexOf(card);
+        if (i > -1) {
+            card.setPosition(this.equipX,this.equipY);
+            this.equipped = card;
+            this.hand.splice(i,1);
+            this.drawCard();
+        } else {
+            console.error("Cannot equip card that is not in hand.")
+        }
+    }
+
+    unequip() {
+        this.deck.push(this.equipped);
+        this.equipped.setVisible(false);
+        this.equipped = null;
+    }
+
+    renderHand(x, y, clickable) {
+        // console.log(`${this.name} - rendering hand at (${x},${y})`);
+
+        const totalWidth = this.handSize * CARD_WIDTH + (this.handSize - 1) * GAP;
+        x = x - totalWidth/2;
+
+        for (let i = 0; i < this.handSize; i++) {
+            let cardX = x+i*(CARD_WIDTH+GAP);
+            let cardY = y-CARD_WIDTH/2;
+            let card = this.hand[i];
+            card.setPosition(cardX,cardY);
+            card.setVisible(true);
+
+            if (clickable) {
+                card.baseNum.setInteractive();
+                card.baseNum.on('pointerdown', () => {
+                    console.log("Card clicked:", card.getData("value"), card.getData("element"), card.getData("direction"));
+                    if (!this.equipped) {
+                        this.equipCard(card);
+                    } else {
+                        console.log("p1 already has a card equipped");
+                    }
+                });
+            } else {
+                card.baseNum.disableInteractive();
+            }
+        }
+    }
+
+    decreaseHand() {
+        if (this.handSize > 2) {
+            this.handSize--;
+        }
+    }
+
+    increaseHand() {
+        if (this.handSize < 10) {
+            this.handSize++;
+        }
+    }
+    
+    collectCard(card) {
+        const directionToNum = {
+            [Directions.NORTH]: 0,
+            [Directions.EAST]: 1,
+            [Directions.SOUTH]: 2,
+            [Directions.WEST]: 3,
+        }
+        console.log(`${this.name} collected ${card}!`);
+        this.collection[directionToNum[card.getData("direction")]][card.getData("element")] = 1;
+    }
+    
+    renderCollection(x, y, textDirection, squareSize = 64) {
+        // x, y is the middle, top of where the box will be rendered
+        // textdirection = 0 means text will be under box, 1 means text will be above
+        // squaresize is the size of one 2x2 direction box
+        const totalWidth = 4 * squareSize + 3 * GAP;
+        x = x - totalWidth/2;
+
+        // this.scene.rectangles = [];
+        this.collectionObjects = []; 
+
+        const directions = ["N","E","S","W"];
+
+        for (let i = 0; i < 4; i++) {
+            let text;
+            if (textDirection == 0) {
+                text = this.scene.add.text(x + (squareSize + GAP) * i + squareSize/2, y + squareSize, directions[i], {
+                    fontSize: '16px',
+                    fontFamily: 'Arial',
+                    color: '#000000',
+                    align: 'center'
+                }).setOrigin(0.5,0);
+            } else {
+                text = this.scene.add.text(x + (squareSize + GAP) * i + squareSize/2, y, directions[i], {
+                    fontSize: '16px',
+                    fontFamily: 'Arial',
+                    color: '#000000',
+                    align: 'center'
+                }).setOrigin(0.5,1);
+            }
+            // this.scene.rectangles.push(this.createFourSquare(x + (squareSize + GAP) * i, y, squareSize, this.collection[i]));
+            this.collectionObjects.push(text);
+
+            const squares = this.createFourSquare(
+                x + (squareSize + GAP) * i, 
+                y, 
+                squareSize, 
+                this.collection[i]
+            );
+
+            Object.values(squares).forEach(square => this.collectionObjects.push(square));
+        }
+    }
+    
+    destroyCollection() {
+        this.collectionObjects.forEach(obj => {
+            if (obj && obj.destroy) obj.destroy(); // Ensure object exists and has a destroy method
+        });
+        this.collectionObjects = [];
+    }
+
+    createFourSquare(x, y, squareSize, fills, border = 2) {
+        const rectSize = squareSize / 2;
+
+        const fireFill = fills[Elements.FIRE] ? 0xa02020 : 0xffffff;
+        const airFill = fills[Elements.AIR] ? 0xc0c020 : 0xffffff;
+        const waterFill = fills[Elements.WATER] ? 0x2020a0 : 0xffffff;
+        const earthFill = fills[Elements.EARTH] ? 0x20a020 : 0xffffff;
+
+        let fourSquare = {
+            [Elements.FIRE]: this.#createSquare(x, y, rectSize, border, fireFill), //0xff0000 red
+            [Elements.AIR]: this.#createSquare(x + rectSize, y, rectSize, border, airFill), //0xffff00 yellow
+            [Elements.WATER]: this.#createSquare(x, y + rectSize, rectSize, border, waterFill), //0x0000ff blue
+            [Elements.EARTH]: this.#createSquare(x + rectSize, y + rectSize, rectSize, border, earthFill) //0x00ff00 green
+        };
+
+        return fourSquare;
+    }
+
+    #createSquare(x, y, size, border, fill) {
+        let graphics = this.scene.add.graphics();
+
+        graphics.lineStyle(border, 0x000000, 1.0);
+        graphics.fillStyle(fill, 1.0);
+        graphics.fillRect(x, y, size, size);
+        graphics.strokeRect(x, y, size, size);
+
+        return graphics;
+    }
+
+    modifyCoins(amount) {
+        this.coins += amount;
+    }
+
+    checkWin() {
+        console.log(`checking if ${this.name} has won`);
+        console.log(this.collection);
+        let avatarWin = this.collection.some(item => 
+            item[Elements.FIRE] === 1 &&
+            item[Elements.AIR] === 1 &&
+            item[Elements.WATER] === 1 &&
+            item[Elements.EARTH] === 1
+        );
+        if (avatarWin) {
+            console.log("won by mastering the X style of all 4 elements");
+        }
+        let masterWin = false;
+        for (let e of Object.values(Elements)) {
+            if (this.collection.every(item => item[e] === 1)) {
+                console.log("won by mastering all styles of ",e);
+                masterWin = true;
+                break;
+            }
+        }
+        // this.collection = [
+        //     { [Elements.FIRE]: 0, [Elements.AIR]: 0, [Elements.WATER]: 0, [Elements.EARTH]: 0 },
+        //     { [Elements.FIRE]: 0, [Elements.AIR]: 0, [Elements.WATER]: 0, [Elements.EARTH]: 0 },
+        //     { [Elements.FIRE]: 0, [Elements.AIR]: 0, [Elements.WATER]: 0, [Elements.EARTH]: 0 },
+        //     { [Elements.FIRE]: 0, [Elements.AIR]: 0, [Elements.WATER]: 0, [Elements.EARTH]: 0 }
+        // ];
+        return avatarWin || masterWin;
+    }
+}
+
+
+
+export function Fight(p1,p2,spaceElement) {
+    const losesAgainst = {
+        [Elements.AIR]: Elements.FIRE,
+        [Elements.FIRE]: Elements.WATER,
+        [Elements.WATER]: Elements.EARTH,
+        [Elements.EARTH]: Elements.AIR
+    };
+    const winsAgainst = {
+        [Elements.WATER]: Elements.FIRE,
+        [Elements.EARTH]: Elements.WATER,
+        [Elements.AIR]: Elements.EARTH,
+        [Elements.FIRE]: Elements.AIR
+    };
+
+    let c1 = p1.equipped;
+    let c2 = p2.equipped;
+
+    console.log("fight!");
+    console.log("p2 card:", c2.getData("value"), c2.getData("element"), c2.getData("direction"));
+
+    if (!c1) {
+        return c2;
+    }
+    if (c1.getData("element") == c2.getData("element")) {
+        if (c1.getData("value") == c2.getData("value")) {
+            return null;
+        } else {
+            return c1.getData("value") > c2.getData("value") ? p1 : p2;
+        }
+    }
+    if (c1.getData("element") == spaceElement) {
+        return losesAgainst[spaceElement] == c2.getData("element") ? p2 : p1;
+    } else if (c2.getData("element") == spaceElement) {
+        return losesAgainst[spaceElement] == c1.getData("element") ? p1 : p2;
+    }
+    if (winsAgainst[c1.getData("element")] == c2.getData("element")) {
+        return p1;
+    } else if (winsAgainst[c2.getData("element")] == c1.getData("element")) {
+        return p2;
+    }
+    return null;
+}
