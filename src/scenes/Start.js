@@ -4,14 +4,18 @@ est. 10h
 Angela Huang
 
 to-do:
- () [feat] add help/info for winning elements & other useful text
- () [feat] all element tile
- () [feat] add movement, dice, spawn
- () [dev/enhance] direction message for win by 4 elements of a direction
- () [art] create accessories for frogs + more colours?
- () [art/feat] gray frog for computer
- () [feat] customize character on menu screen
- () [feat] multiplayer
+() [feat][art] all element tile
+() [epic][feat] board movement
+    - spawn: add randomized spawn space
+    - dice: figure out where to put, add keyboard shortcut, assign random num 1-5 for moves
+    - update pointerdown on space: put into separate function to check if can move to space & if a fight should be started
+    - keyboard movement: wasd & arrow keys to move on board
+() [feat] add help/info for winning elements & other useful text
+() [art] create accessories for frogs + more colours?
+() [art][feat] gray frog for computer
+() [feat] customize character on menu screen
+() [feat] multiplayer
+() [dev][enhance] direction message for win by 4 elements of a direction
 
 completed:
 (x) implement fight function to compare cards
@@ -74,7 +78,7 @@ export class Start extends Phaser.Scene
 
         this.#generateBoard();
 
-        this.p1 = new Player("candycane123",this.selectedFrog,this,768,336,7,850,550);
+        this.p1 = new Player("candycane123",this.selectedFrog,this,768,336,7,512-SPACE_SIZE,384-SPACE_SIZE);
         this.p2 = new Player("Computer",'frog-blue',this,160);
 
 
@@ -88,6 +92,20 @@ export class Start extends Phaser.Scene
         // this.input.on('pointerdown', (pointer) => {
         //     this.p1.moveCharacter(pointer.x,pointer.y);
         // });
+    }
+
+    #checkValidMove(px,py,x,y) {
+        return (Math.abs(px-x) == SPACE_SIZE && py == y) || (px == x && Math.abs(py-y) == SPACE_SIZE);
+    }
+
+    #movePlayer(p, x, y, e) {
+        let [px,py] = p.getCharacterPos();
+        console.log(`attempting to move player from (${px},${py}) to (${x},${y})`);
+        if (this.#checkValidMove(px,py,x,y)) {
+            p.moveCharacter(x,y);
+            this.spaceElement = e;
+            this.#startFightScene();
+        }
     }
 
     #generateBoard() {
@@ -116,11 +134,11 @@ export class Start extends Phaser.Scene
                     "spaceElement": currentElement
                 });
                 space.on('pointerdown', () => {
-                    this.p1.moveCharacter(anchorX+SPACE_SIZE*j,anchorY+SPACE_SIZE*i);
-                    console.log(`Clicked on space with element: ${currentElement}`);
-                    this.spaceElement = currentElement;
-                    this.#startFightScene();
-                    this.p1.setCharacterVisible(false);
+                    this.#movePlayer(this.p1,anchorX+SPACE_SIZE*j,anchorY+SPACE_SIZE*i,currentElement);
+                    // this.p1.moveCharacter(anchorX+SPACE_SIZE*j,anchorY+SPACE_SIZE*i);
+                    // console.log(`Clicked on space with element: ${currentElement}`);
+                    // this.spaceElement = currentElement;
+                    // this.#startFightScene();
                 });
             }
         }
@@ -147,6 +165,8 @@ export class Start extends Phaser.Scene
         this.cameras.main.setBackgroundColor(bgcolours[this.spaceElement]);
 
         this.#showBoard(false);
+        this.p1.setCharacterVisible(false);
+        this.p2.setCharacterVisible(false);
 
         this.p1.renderHand(PLAYER_HAND_X, PLAYER_HAND_Y, true);
         this.p2.renderHand(PLAYER_HAND_X, 96, false);
@@ -200,6 +220,7 @@ export class Start extends Phaser.Scene
             this.scene.start('End', { won: false });
         } else {
             this.p1.setCharacterVisible(true);
+            this.p2.setCharacterVisible(true);
         }
     }
 

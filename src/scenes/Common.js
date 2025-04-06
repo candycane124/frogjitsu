@@ -49,6 +49,10 @@ export class Player {
         this.character.setPosition(x,y);
     }
 
+    getCharacterPos() {
+        return [this.character.x,this.character.y]
+    }
+
     setCharacterVisible(visible) {
         this.character.setVisible(visible);
     }
