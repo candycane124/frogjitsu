@@ -1,21 +1,20 @@
 /*
 FrogJitsu
-est. 10h
 Angela Huang
 
 to-do:
-() [feat][art] all element tile
 () [epic][feat] board movement
-    - spawn: add randomized spawn space
     - dice: figure out where to put, add keyboard shortcut, assign random num 1-5 for moves
-    - update pointerdown on space: put into separate function to check if can move to space & if a fight should be started
-    - keyboard movement: wasd & arrow keys to move on board
-() [feat] add help/info for winning elements & other useful text
-() [art] create accessories for frogs + more colours?
-() [art][feat] gray frog for computer
-() [feat] customize character on menu screen
+    - update #movePlayer: check if a fight should be started
+() [feat] add info text
+() [epic][feat] frog character customization
+    - add yellow frog
+    - create accessories for frogs
+    - add gray frog for computer
+    - customize character on menu screen
 () [feat] multiplayer
 () [dev][enhance] direction message for win by 4 elements of a direction
+() [feat][enhance] keyboard movement: wasd & arrow keys to move on board
 
 completed:
 (x) implement fight function to compare cards
@@ -32,15 +31,17 @@ completed:
 (x) [bug] tie rematch does not work
 (x) [dev] add to github & move to vscode
 (x) [enhance] update card directions to be black
+(x) [feat][art] all element tile
 */
 
-import { Elements, Directions, Player, Fight } from './Common.js';
+import { Elements, Player, Fight } from './Common.js';
 
-const PLAYER_HAND_X = 512;
+const SCREEN_MIDDLE_X = 512;
+const SCREEN_MIDDLE_Y = 384;
 const PLAYER_HAND_Y = 672;
-const PLAYER_COLLECTION_Y = 548;
-const SPACE_SCALE = 0.1875
-const SPACE_SIZE = 96;
+const PLAYER_COLLECTION_Y = 576;
+const SPACE_SCALE = 0.125
+const SPACE_SIZE = 64;
 
 export class Start extends Phaser.Scene
 {
@@ -59,6 +60,8 @@ export class Start extends Phaser.Scene
         this.load.image('space-water','assets/spaces/space-water.png');
         this.load.image('space-earth','assets/spaces/space-earth.png');
         this.load.image('space-air','assets/spaces/space-air.png');
+        this.load.image('space-all','assets/spaces/space-all.png');
+        this.load.image('space-none','assets/spaces/space-none.png');
         this.load.image('card-fire','assets/cards/card-fire.png');
         this.load.image('card-water','assets/cards/card-water.png');
         this.load.image('card-earth','assets/cards/card-earth.png');
@@ -74,19 +77,26 @@ export class Start extends Phaser.Scene
 
     create()
     {
-        // this.add.image(850, 550, this.selectedFrog).setScale(SPACE_SCALE/1.5);
+        let spawns = [
+            [SCREEN_MIDDLE_X,SCREEN_MIDDLE_Y-2*SPACE_SIZE],
+            [SCREEN_MIDDLE_X+2*SPACE_SIZE,SCREEN_MIDDLE_Y],
+            [SCREEN_MIDDLE_X,SCREEN_MIDDLE_Y+2*SPACE_SIZE],
+            [SCREEN_MIDDLE_X-2*SPACE_SIZE,SCREEN_MIDDLE_Y]
+        ]
+        let randSpawn = Math.floor(Math.random()*4);
+        console.log("spawn: ", randSpawn);
 
-        this.#generateBoard();
+        this.#generateBoard(spawns);
 
-        this.p1 = new Player("candycane123",this.selectedFrog,this,768,336,7,512-SPACE_SIZE,384-SPACE_SIZE);
+        this.p1 = new Player("candycane123",this.selectedFrog,this,768,336,7,spawns[randSpawn][0],spawns[randSpawn][1]);
         this.p2 = new Player("Computer",'frog-blue',this,160);
 
 
         console.log(this.p1);
         console.log(this.p2);
 
-        this.p1.renderHand(PLAYER_HAND_X,PLAYER_HAND_Y,false);
-        this.p1.renderCollection(PLAYER_HAND_X,PLAYER_COLLECTION_Y,1);
+        this.p1.renderHand(SCREEN_MIDDLE_X,PLAYER_HAND_Y,false);
+        this.p1.renderCollection(SCREEN_MIDDLE_X,PLAYER_COLLECTION_Y,1);
 
         this.fightInProgress = false;
         // this.input.on('pointerdown', (pointer) => {
@@ -108,7 +118,7 @@ export class Start extends Phaser.Scene
         }
     }
 
-    #generateBoard() {
+    #generateBoard(spawns) {
         this.cameras.main.setBackgroundColor('#DDD');
 
         //generate map
@@ -123,8 +133,8 @@ export class Start extends Phaser.Scene
 
         console.log(spaces)
 
-        let anchorX = 512-SPACE_SIZE;
-        let anchorY = 384-SPACE_SIZE;
+        let anchorX = SCREEN_MIDDLE_X-SPACE_SIZE;
+        let anchorY = SCREEN_MIDDLE_Y-SPACE_SIZE;
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
                 let currentElement = spaces[i*3+j];
@@ -141,6 +151,12 @@ export class Start extends Phaser.Scene
                     // this.#startFightScene();
                 });
             }
+        }
+        // spawn spaces
+        for (let [x, y] of spawns) {
+            this.add.image(x, y, 'space-none').setScale(SPACE_SCALE).setData({
+                "spaceElement": Elements.NONE
+            });
         }
     }
 
@@ -168,9 +184,9 @@ export class Start extends Phaser.Scene
         this.p1.setCharacterVisible(false);
         this.p2.setCharacterVisible(false);
 
-        this.p1.renderHand(PLAYER_HAND_X, PLAYER_HAND_Y, true);
-        this.p2.renderHand(PLAYER_HAND_X, 96, false);
-        this.p2.renderCollection(PLAYER_HAND_X,156,0);
+        this.p1.renderHand(SCREEN_MIDDLE_X, PLAYER_HAND_Y, true);
+        this.p2.renderHand(SCREEN_MIDDLE_X, 96, false);
+        this.p2.renderCollection(SCREEN_MIDDLE_X,156,0);
 
     }
 
@@ -178,7 +194,7 @@ export class Start extends Phaser.Scene
         let winner = Fight(this.p1,this.p2,this.spaceElement);
         let result = winner ? `${winner.name} wins` : "tie";
 
-        let resultText = this.add.text(512, 384, result, {
+        let resultText = this.add.text(SCREEN_MIDDLE_X, SCREEN_MIDDLE_Y, result, {
             fontSize: '32px',
             fontFamily: 'Arial',
             color: '#000000',
@@ -191,7 +207,7 @@ export class Start extends Phaser.Scene
             resultText.destroy();
             if (winner) {
                 winner.collectCard(winner.equipped);
-                this.p1.renderCollection(PLAYER_HAND_X,PLAYER_COLLECTION_Y,1);
+                this.p1.renderCollection(SCREEN_MIDDLE_X,PLAYER_COLLECTION_Y,1);
             }
 
             this.p1.unequip();
@@ -202,12 +218,12 @@ export class Start extends Phaser.Scene
                 this.#showBoard(true);
                 this.p1.hand.forEach(card => card.setVisible(false));
                 this.p2.hand.forEach(card => card.setVisible(false));
-                this.p1.renderHand(PLAYER_HAND_X,PLAYER_HAND_Y,false);
+                this.p1.renderHand(SCREEN_MIDDLE_X,PLAYER_HAND_Y,false);
                 this.p2.destroyCollection();
                 this.#checkWinner();
             } else {
-                this.p1.renderHand(PLAYER_HAND_X, PLAYER_HAND_Y, true);
-                this.p2.renderHand(PLAYER_HAND_X, 96, false);
+                this.p1.renderHand(SCREEN_MIDDLE_X, PLAYER_HAND_Y, true);
+                this.p2.renderHand(SCREEN_MIDDLE_X, 96, false);
             }
         });
     }
@@ -219,6 +235,7 @@ export class Start extends Phaser.Scene
         else if (this.p2.checkWin()) {
             this.scene.start('End', { won: false });
         } else {
+            this.cameras.main.setBackgroundColor('#DDD');
             this.p1.setCharacterVisible(true);
             this.p2.setCharacterVisible(true);
         }

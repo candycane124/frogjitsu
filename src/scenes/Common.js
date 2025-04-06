@@ -18,7 +18,8 @@ export class Frog {
 
 };
 
-const CARD_WIDTH = 96;
+const CARD_SCALE = 0.0625;
+const CARD_SIZE = 64;
 const GAP = 16;
 
 export class Player {
@@ -42,7 +43,7 @@ export class Player {
         this.equipped = null;
         this.equipX = equipX;
         this.equipY = equipY;
-        this.character = scene.add.image(x,y,frog).setScale(0.09);
+        this.character = scene.add.image(x,y,frog).setScale(0.05);
     }
 
     moveCharacter(x,y) {
@@ -58,9 +59,9 @@ export class Player {
     }
 
     #createCard(scene, value, element, direction, x = 0, y = 0) {
-        let baseNum = scene.add.image(0,0,'card-'+value.toString()).setScale(0.09375).setOrigin(0,0);
-        let elementIcon = scene.add.image(0,0,'card-'+element).setScale(0.09375).setOrigin(0,0);
-        let directionMarker = scene.add.image(0,0,'card-'+direction).setScale(0.09375).setOrigin(0,0);
+        let baseNum = scene.add.image(0,0,'card-'+value.toString()).setScale(CARD_SCALE).setOrigin(0,0);
+        let elementIcon = scene.add.image(0,0,'card-'+element).setScale(CARD_SCALE).setOrigin(0,0);
+        let directionMarker = scene.add.image(0,0,'card-'+direction).setScale(CARD_SCALE).setOrigin(0,0);
 
         let cardGroup = scene.add.container(x, y).setData({
             "value": value,
@@ -83,13 +84,6 @@ export class Player {
             for (let element of elements) {
                 for (let direction of directions) {
                     let card = this.#createCard(scene,value,element,direction);
-                    // let card = scene.add.image(0,0,'card-'+value.toString()).setScale(0.09375).setOrigin(0,0).setInteractive({
-                    //                 draggable: true
-                    //             }).setData({
-                    //                 "value": value,
-                    //                 "element": element,
-                    //                 "direction": direction
-                    //             }).setVisible(false);
                     deck.push(card);
                 }
             }
@@ -127,12 +121,12 @@ export class Player {
     renderHand(x, y, clickable) {
         // console.log(`${this.name} - rendering hand at (${x},${y})`);
 
-        const totalWidth = this.handSize * CARD_WIDTH + (this.handSize - 1) * GAP;
+        const totalWidth = this.handSize * CARD_SIZE + (this.handSize - 1) * GAP;
         x = x - totalWidth/2;
 
         for (let i = 0; i < this.handSize; i++) {
-            let cardX = x+i*(CARD_WIDTH+GAP);
-            let cardY = y-CARD_WIDTH/2;
+            let cardX = x+i*(CARD_SIZE+GAP);
+            let cardY = y-CARD_SIZE/2;
             let card = this.hand[i];
             card.setPosition(cardX,cardY);
             card.setVisible(true);
@@ -176,7 +170,7 @@ export class Player {
         this.collection[directionToNum[card.getData("direction")]][card.getData("element")] = 1;
     }
     
-    renderCollection(x, y, textDirection, squareSize = 64) {
+    renderCollection(x, y, textDirection, squareSize = 48) {
         // x, y is the middle, top of where the box will be rendered
         // textdirection = 0 means text will be under box, 1 means text will be above
         // squaresize is the size of one 2x2 direction box
@@ -191,14 +185,14 @@ export class Player {
             let text;
             if (textDirection == 0) {
                 text = this.scene.add.text(x + (squareSize + GAP) * i + squareSize/2, y + squareSize, directions[i], {
-                    fontSize: '16px',
+                    fontSize: '14px',
                     fontFamily: 'Arial',
                     color: '#000000',
                     align: 'center'
                 }).setOrigin(0.5,0);
             } else {
                 text = this.scene.add.text(x + (squareSize + GAP) * i + squareSize/2, y, directions[i], {
-                    fontSize: '16px',
+                    fontSize: '14px',
                     fontFamily: 'Arial',
                     color: '#000000',
                     align: 'center'
