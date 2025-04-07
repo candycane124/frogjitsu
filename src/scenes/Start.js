@@ -5,12 +5,11 @@ Angela Huang
 to-do:
 () [epic][feat] board movement
     - dice: figure out where to put, add keyboard shortcut, assign random num 1-5 for moves
-    - update #movePlayer: check if a fight should be started
+    - update #movePlayer: check if a fight should be started - for now just if the player has 0 moves left
 () [feat] add info text
+() [feat] all element fight
 () [epic][feat] frog character customization
-    - add yellow frog
     - create accessories for frogs
-    - add gray frog for computer
     - customize character on menu screen
 () [feat] multiplayer
 () [dev][enhance] direction message for win by 4 elements of a direction
@@ -84,12 +83,13 @@ export class Start extends Phaser.Scene
             [SCREEN_MIDDLE_X-2*SPACE_SIZE,SCREEN_MIDDLE_Y]
         ]
         let randSpawn = Math.floor(Math.random()*4);
-        console.log("spawn: ", randSpawn);
+        let compSpawn = (randSpawn+2)%4;
+        console.log("p1 spawn: ", randSpawn, "p2 spawn: ", compSpawn);
 
         this.#generateBoard(spawns);
 
-        this.p1 = new Player("candycane123",this.selectedFrog,this,768,336,7,spawns[randSpawn][0],spawns[randSpawn][1]);
-        this.p2 = new Player("Computer",'frog-blue',this,160);
+        this.p1 = new Player("candycane123",this.selectedFrog,this,spawns[randSpawn][0],spawns[randSpawn][1],768,336,7);
+        this.p2 = new Player("Computer",'frog-gray',this,spawns[compSpawn][0],spawns[compSpawn][1],160);
 
 
         console.log(this.p1);

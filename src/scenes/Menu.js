@@ -1,7 +1,8 @@
 const FROG_SCALE = 0.1875;
+const FROG_SIZE = 1024*FROG_SCALE;
 const SCREEN_WIDTH = 1024;
 const SCREEN_HEIGHT = 768;
-const GAP = 64;
+const GAP = 48;
 
 export class Menu extends Phaser.Scene
 {
@@ -15,6 +16,8 @@ export class Menu extends Phaser.Scene
         this.load.image('frog-blue','assets/frogs/frog-blue.png');
         this.load.image('frog-green','assets/frogs/frog-green.png');
         this.load.image('frog-red','assets/frogs/frog-red.png');
+        this.load.image('frog-yellow','assets/frogs/frog-yellow.png');
+        this.load.image('frog-gray','assets/frogs/frog-gray.png')
     }
 
     create()
@@ -22,9 +25,10 @@ export class Menu extends Phaser.Scene
         this.cameras.main.setBackgroundColor('#DDD');
 
         const frogs = [
-            { key: 'frog-blue', x: SCREEN_WIDTH/2-GAP-192 },
-            { key: 'frog-green', x: SCREEN_WIDTH/2 },
-            { key: 'frog-red', x: SCREEN_WIDTH/2+GAP+192 }
+            { key: 'frog-blue', x: SCREEN_WIDTH/2-GAP*3/2-FROG_SIZE*3/2 },
+            { key: 'frog-green', x: SCREEN_WIDTH/2-GAP/2-FROG_SIZE/2 },
+            { key: 'frog-red', x: SCREEN_WIDTH/2+GAP/2+FROG_SIZE/2 },
+            { key: 'frog-yellow', x: SCREEN_WIDTH/2+GAP*3/2+FROG_SIZE*3/2 }
         ];
 
         frogs.forEach(frog => {
