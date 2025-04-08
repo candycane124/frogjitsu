@@ -4,7 +4,7 @@ Angela Huang
 
 to-do:
 () [epic][feat] board movement
-    - dice: figure out where to put, add keyboard shortcut, assign random num 1-5 for moves
+    - dice: being roll dice asset, resize & reposition, add keyboard shortcut
     - update #movePlayer: check if a fight should be started - for now just if the player has 0 moves left
 () [feat] add info text
 () [feat] all element fight
@@ -39,6 +39,8 @@ const SCREEN_MIDDLE_X = 512;
 const SCREEN_MIDDLE_Y = 384;
 const PLAYER_HAND_Y = 672;
 const PLAYER_COLLECTION_Y = 576;
+const PLAYER_EQUIP_X = 768;
+const PLAYER_EQUIP_Y = 336;
 const SPACE_SCALE = 0.125
 const SPACE_SIZE = 64;
 
@@ -72,6 +74,9 @@ export class Start extends Phaser.Scene
         for (let i = 0; i < 12; i++) {
             this.load.image('card-'+i.toString(),'assets/cards/card-'+i.toString()+'.png');
         }
+        for (let i = 1; i <= 6; i++) {
+            this.load.image('dice-'+i.toString(),'assets/die/dice-'+i.toString()+'.png');
+        }
     }
 
     create()
@@ -88,7 +93,7 @@ export class Start extends Phaser.Scene
 
         this.#generateBoard(spawns);
 
-        this.p1 = new Player("candycane123",this.selectedFrog,this,spawns[randSpawn][0],spawns[randSpawn][1],768,336,7);
+        this.p1 = new Player("candycane123",this.selectedFrog,this,spawns[randSpawn][0],spawns[randSpawn][1],PLAYER_EQUIP_X,PLAYER_EQUIP_Y,7);
         this.p2 = new Player("Computer",'frog-gray',this,spawns[compSpawn][0],spawns[compSpawn][1],160);
 
 
@@ -102,6 +107,20 @@ export class Start extends Phaser.Scene
         // this.input.on('pointerdown', (pointer) => {
         //     this.p1.moveCharacter(pointer.x,pointer.y);
         // });
+
+        this.#generateDice();
+    }
+
+    #generateDice() {
+        let roll = this.add.image(PLAYER_EQUIP_X,PLAYER_EQUIP_Y,'card-0').setScale(SPACE_SCALE).setInteractive();
+
+        roll.on('pointerdown', () => {
+            let rolled = Math.floor(Math.random()*4)+1;
+            console.log("rolled: ", rolled);
+            this.dice = this.add.image(PLAYER_EQUIP_X,PLAYER_EQUIP_Y,'dice-'+rolled.toString()).setScale(SPACE_SCALE);
+            this.p1.setMoves(rolled);
+            roll.destroy();
+        })
     }
 
     #checkValidMove(px,py,x,y) {
@@ -111,10 +130,13 @@ export class Start extends Phaser.Scene
     #movePlayer(p, x, y, e) {
         let [px,py] = p.getCharacterPos();
         console.log(`attempting to move player from (${px},${py}) to (${x},${y})`);
-        if (this.#checkValidMove(px,py,x,y)) {
+        if (this.#checkValidMove(px,py,x,y) && p.getMoves() > 0) {
             p.moveCharacter(x,y);
             this.spaceElement = e;
-            this.#startFightScene();
+            p.modifyMoves(-1);
+            if (p.getMoves() == 0) {
+                this.#startFightScene();
+            }
         }
     }
 
@@ -188,6 +210,7 @@ export class Start extends Phaser.Scene
         this.p2.renderHand(SCREEN_MIDDLE_X, 96, false);
         this.p2.renderCollection(SCREEN_MIDDLE_X,156,0);
 
+        this.dice.destroy();
     }
 
     #triggerFight() {
@@ -238,6 +261,7 @@ export class Start extends Phaser.Scene
             this.cameras.main.setBackgroundColor('#DDD');
             this.p1.setCharacterVisible(true);
             this.p2.setCharacterVisible(true);
+            this.#generateDice();
         }
     }
 

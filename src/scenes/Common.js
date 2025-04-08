@@ -44,6 +44,19 @@ export class Player {
         this.equipX = equipX;
         this.equipY = equipY;
         this.character = scene.add.image(x,y,frog).setScale(0.05);
+        this.moves = 0;
+    }
+
+    getMoves() {
+        return this.moves
+    }
+
+    setMoves(amt) {
+        this.moves = amt;
+    }
+
+    modifyMoves(amt) {
+        this.moves += amt;
     }
 
     moveCharacter(x,y) {
