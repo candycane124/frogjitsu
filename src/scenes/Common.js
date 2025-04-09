@@ -14,6 +14,9 @@ export const Directions = {
     WEST: 'west'
 };
 
+export const SCREEN_WIDTH = 1024;
+export const SCREEN_HEIGHT = 768;
+
 export class Frog {
 
 };
@@ -23,7 +26,7 @@ const CARD_SIZE = 64;
 const GAP = 16;
 
 export class Player {
-    constructor(name, frog, scene, x, y, equipX, equipY = 336,handSize = 7) {
+    constructor(name, frog, scene, x, y, equipX, equipY = SCREEN_HEIGHT/2, handSize = 7) {
         this.name = name;
         // this.avatar = avatar;
         this.scene = scene;
@@ -72,9 +75,9 @@ export class Player {
     }
 
     #createCard(scene, value, element, direction, x = 0, y = 0) {
-        let baseNum = scene.add.image(0,0,'card-'+value.toString()).setScale(CARD_SCALE).setOrigin(0,0);
-        let elementIcon = scene.add.image(0,0,'card-'+element).setScale(CARD_SCALE).setOrigin(0,0);
-        let directionMarker = scene.add.image(0,0,'card-'+direction).setScale(CARD_SCALE).setOrigin(0,0);
+        let baseNum = scene.add.image(0,0,'card-'+value.toString()).setScale(CARD_SCALE);
+        let elementIcon = scene.add.image(0,0,'card-'+element).setScale(CARD_SCALE);
+        let directionMarker = scene.add.image(0,0,'card-'+direction).setScale(CARD_SCALE);
 
         let cardGroup = scene.add.container(x, y).setData({
             "value": value,
@@ -135,13 +138,12 @@ export class Player {
         // console.log(`${this.name} - rendering hand at (${x},${y})`);
 
         const totalWidth = this.handSize * CARD_SIZE + (this.handSize - 1) * GAP;
-        x = x - totalWidth/2;
+        const startX = x - totalWidth / 2;
 
         for (let i = 0; i < this.handSize; i++) {
-            let cardX = x+i*(CARD_SIZE+GAP);
-            let cardY = y-CARD_SIZE/2;
+            let cardX = startX+i*(CARD_SIZE+GAP)+CARD_SIZE/2;
             let card = this.hand[i];
-            card.setPosition(cardX,cardY);
+            card.setPosition(cardX, y);
             card.setVisible(true);
 
             if (clickable) {
@@ -184,11 +186,12 @@ export class Player {
     }
     
     renderCollection(x, y, textDirection, squareSize = 48) {
-        // x, y is the middle, top of where the box will be rendered
+        // x, y is the middle of where the boxes will be rendered
         // textdirection = 0 means text will be under box, 1 means text will be above
         // squaresize is the size of one 2x2 direction box
         const totalWidth = 4 * squareSize + 3 * GAP;
-        x = x - totalWidth/2;
+        const startX = x - totalWidth / 2;
+        const squareY = y - squareSize / 2;
 
         this.collectionObjects = []; 
 
@@ -196,15 +199,16 @@ export class Player {
 
         for (let i = 0; i < 4; i++) {
             let text;
+            console.log(y + squareSize/2 + 4, y - squareSize/2 - 4);
             if (textDirection == 0) {
-                text = this.scene.add.text(x + (squareSize + GAP) * i + squareSize/2, y + squareSize, directions[i], {
+                text = this.scene.add.text(startX + (squareSize + GAP) * i + squareSize/2, y + squareSize/2 + 4, directions[i], {
                     fontSize: '14px',
                     fontFamily: 'Arial',
                     color: '#000000',
                     align: 'center'
                 }).setOrigin(0.5,0);
             } else {
-                text = this.scene.add.text(x + (squareSize + GAP) * i + squareSize/2, y, directions[i], {
+                text = this.scene.add.text(startX + (squareSize + GAP) * i + squareSize/2, y - squareSize/2 - 4, directions[i], {
                     fontSize: '14px',
                     fontFamily: 'Arial',
                     color: '#000000',
@@ -215,8 +219,8 @@ export class Player {
             this.collectionObjects.push(text);
 
             const squares = this.createFourSquare(
-                x + (squareSize + GAP) * i, 
-                y, 
+                startX + (squareSize + GAP) * i, 
+                squareY, 
                 squareSize, 
                 this.collection[i]
             );

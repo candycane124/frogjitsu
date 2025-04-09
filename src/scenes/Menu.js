@@ -1,7 +1,8 @@
+import { SCREEN_HEIGHT, SCREEN_WIDTH } from './Common.js';
+
 const FROG_SCALE = 0.1875;
 const FROG_SIZE = 1024*FROG_SCALE;
-const SCREEN_WIDTH = 1024;
-const SCREEN_HEIGHT = 768;
+
 const GAP = 48;
 
 export class Menu extends Phaser.Scene

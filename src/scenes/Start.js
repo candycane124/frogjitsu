@@ -3,17 +3,17 @@ FrogJitsu
 Angela Huang
 
 to-do:
-() [epic][feat] board movement
-    - dice: being roll dice asset, resize & reposition, add keyboard shortcut
-    - update #movePlayer: check if a fight should be started - for now just if the player has 0 moves left
 () [feat] add info text
 () [feat] all element fight
 () [epic][feat] frog character customization
     - create accessories for frogs
     - customize character on menu screen
-() [feat] multiplayer
+() [epic][feat] multiplayer
 () [dev][enhance] direction message for win by 4 elements of a direction
 () [feat][enhance] keyboard movement: wasd & arrow keys to move on board
+() [epic][feat] powerups
+    - assets
+    -
 
 completed:
 (x) implement fight function to compare cards
@@ -31,16 +31,23 @@ completed:
 (x) [dev] add to github & move to vscode
 (x) [enhance] update card directions to be black
 (x) [feat][art] all element tile
+(x) [epic][feat] board movement
 */
 
-import { Elements, Player, Fight } from './Common.js';
+import { Elements, Player, Fight, SCREEN_HEIGHT, SCREEN_WIDTH } from './Common.js';
 
-const SCREEN_MIDDLE_X = 512;
-const SCREEN_MIDDLE_Y = 384;
-const PLAYER_HAND_Y = 672;
-const PLAYER_COLLECTION_Y = 576;
-const PLAYER_EQUIP_X = 768;
-const PLAYER_EQUIP_Y = 336;
+const SCREEN_MIDDLE_X = SCREEN_WIDTH/2;
+const SCREEN_MIDDLE_Y = SCREEN_HEIGHT/2;
+
+const PLAYER_COLLECTION_Y = SCREEN_HEIGHT*25/32;
+const PLAYER_HAND_Y = SCREEN_HEIGHT*7/8;
+const PLAYER_EQUIP_X = SCREEN_WIDTH*3/4;
+
+const COMP_COLLECTION_Y = SCREEN_HEIGHT*7/32;
+const COMP_HAND_Y = SCREEN_HEIGHT*1/8;
+const COMP_EQUIP_X = SCREEN_WIDTH*1/4;
+
+
 const SPACE_SCALE = 0.125
 const SPACE_SIZE = 64;
 
@@ -74,7 +81,7 @@ export class Start extends Phaser.Scene
         for (let i = 0; i < 12; i++) {
             this.load.image('card-'+i.toString(),'assets/cards/card-'+i.toString()+'.png');
         }
-        for (let i = 1; i <= 6; i++) {
+        for (let i = 0; i <= 6; i++) {
             this.load.image('dice-'+i.toString(),'assets/die/dice-'+i.toString()+'.png');
         }
     }
@@ -93,8 +100,8 @@ export class Start extends Phaser.Scene
 
         this.#generateBoard(spawns);
 
-        this.p1 = new Player("candycane123",this.selectedFrog,this,spawns[randSpawn][0],spawns[randSpawn][1],PLAYER_EQUIP_X,PLAYER_EQUIP_Y,7);
-        this.p2 = new Player("Computer",'frog-gray',this,spawns[compSpawn][0],spawns[compSpawn][1],160);
+        this.p1 = new Player("candycane123",this.selectedFrog,this,spawns[randSpawn][0],spawns[randSpawn][1],PLAYER_EQUIP_X,SCREEN_MIDDLE_Y,7);
+        this.p2 = new Player("Computer",'frog-gray',this,spawns[compSpawn][0],spawns[compSpawn][1],COMP_EQUIP_X);
 
 
         console.log(this.p1);
@@ -112,15 +119,23 @@ export class Start extends Phaser.Scene
     }
 
     #generateDice() {
-        let roll = this.add.image(PLAYER_EQUIP_X,PLAYER_EQUIP_Y,'card-0').setScale(SPACE_SCALE).setInteractive();
+        let roll = this.add.image(PLAYER_EQUIP_X,SCREEN_MIDDLE_Y,'dice-0').setScale(SPACE_SCALE/1.5).setInteractive();
 
-        roll.on('pointerdown', () => {
+        const rollDice = () => {
             let rolled = Math.floor(Math.random()*4)+1;
             console.log("rolled: ", rolled);
-            this.dice = this.add.image(PLAYER_EQUIP_X,PLAYER_EQUIP_Y,'dice-'+rolled.toString()).setScale(SPACE_SCALE);
+            this.dice = this.add.image(PLAYER_EQUIP_X,SCREEN_MIDDLE_Y,'dice-'+rolled.toString()).setScale(SPACE_SCALE/1.5);
             this.p1.setMoves(rolled);
             roll.destroy();
-        })
+        };
+
+        roll.on('pointerdown', rollDice);
+
+        this.input.keyboard.on('keydown-R', () => {
+            if (roll.active) { 
+                rollDice();
+            }
+        });
     }
 
     #checkValidMove(px,py,x,y) {
@@ -134,7 +149,13 @@ export class Start extends Phaser.Scene
             p.moveCharacter(x,y);
             this.spaceElement = e;
             p.modifyMoves(-1);
-            if (p.getMoves() == 0) {
+
+            const movesLeft = p.getMoves();
+            if (this.dice) {
+                this.dice.setTexture('dice-' + movesLeft);
+            }
+
+            if (movesLeft == 0) {
                 this.#startFightScene();
             }
         }
@@ -207,8 +228,8 @@ export class Start extends Phaser.Scene
         this.p2.setCharacterVisible(false);
 
         this.p1.renderHand(SCREEN_MIDDLE_X, PLAYER_HAND_Y, true);
-        this.p2.renderHand(SCREEN_MIDDLE_X, 96, false);
-        this.p2.renderCollection(SCREEN_MIDDLE_X,156,0);
+        this.p2.renderHand(SCREEN_MIDDLE_X, COMP_HAND_Y, false);
+        this.p2.renderCollection(SCREEN_MIDDLE_X,COMP_COLLECTION_Y,0);
 
         this.dice.destroy();
     }
@@ -230,7 +251,7 @@ export class Start extends Phaser.Scene
             resultText.destroy();
             if (winner) {
                 winner.collectCard(winner.equipped);
-                this.p1.renderCollection(SCREEN_MIDDLE_X,PLAYER_COLLECTION_Y,1);
+                this.p1.renderCollection(SCREEN_MIDDLE_X, PLAYER_COLLECTION_Y,1);
             }
 
             this.p1.unequip();
@@ -246,7 +267,7 @@ export class Start extends Phaser.Scene
                 this.#checkWinner();
             } else {
                 this.p1.renderHand(SCREEN_MIDDLE_X, PLAYER_HAND_Y, true);
-                this.p2.renderHand(SCREEN_MIDDLE_X, 96, false);
+                this.p2.renderHand(SCREEN_MIDDLE_X, COMP_HAND_Y, false);
             }
         });
     }
@@ -276,6 +297,19 @@ export class Start extends Phaser.Scene
             },this);
         }
 
-        
+        // Display mouse coordinates for troubleshooting
+        if (!this.mouseText) {
+            this.mouseText = this.add.text(10, 10, '', {
+                fontSize: '16px',
+                fontFamily: 'Arial',
+                color: '#000000',
+                backgroundColor: '#FFFFFF',
+                padding: { x: 5, y: 2 }
+            }).setDepth(1000); // Ensure it's always on top
+        }
+
+        const pointer = this.input.activePointer;
+        this.mouseText.setText(`Mouse: (${pointer.x.toFixed(0)}, ${pointer.y.toFixed(0)})`);
+
     }
 }
