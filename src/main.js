@@ -1,5 +1,5 @@
 import { Start } from './scenes/Start.js';
-import { Menu, End } from './scenes/Menu.js';
+import { Menu, End, Instructions } from './scenes/Menu.js';
 
 const config = {
     type: Phaser.AUTO,
@@ -12,7 +12,8 @@ const config = {
     scene: [
         Menu,
         Start,
-        End
+        End,
+        Instructions
     ],
     scale: {
         mode: Phaser.Scale.FIT,
