@@ -37,7 +37,7 @@ export class Menu extends Phaser.Scene
             }
         ).setOrigin(0.5);
 
-        this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*3/4, 
+        this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*7/8-24, 
             "How to play?", 
             {
             fontSize: '32px',
@@ -82,46 +82,69 @@ export class Instructions extends Phaser.Scene {
         super('Instructions');
     }
 
+    preload() {
+        this.load.image('main-screen-info','assets/info/main-screen-info.png');
+    }
+
     create() {
         this.cameras.main.setBackgroundColor('#DDD');
 
+        this.page = 0;
         let title = "🐸 Frogjitsu – How to Play"
-        let instructions = `
-🎲 Gameplay:
-    1. Roll a die to determine how many spaces you can move
-    2. When you have 0 moves, a fight begins on the space you landed on
-⚔️ Combat Rules:
-    1. Each player picks a card from their hand
-    2. Elemental advantage rules:
-        Fire 🔥 beats Air 🌬️
-        Earth 🌱 beats Water 💧
-        Air 🌬️ beats Earth 🌱
-        Water 💧 beats Fire 🔥
-        Plus, the space's element gets an advantage:
-            On an Earth space, Earth also beats Fire
-            On a Water space, Water also beats Air
-            On a Fire space, Fire also beats Earth
-            On an Air space, Air also beats Water
-    3. If the elements played are not mentioned, a tie occurs
-    4. If both players play the same element, the higher number wins
-    5. The winner collects the card they played
-    6. Both players draw a new card from their deck (unless restricted or modified by powerups)
+        let instructionText = [
+            `
 🎯 Objective:
     Be the first player to either:
-        1. Collect all 4 elements (Fire, Water, Earth, Air) of any one direction,
+        1. COLLECT all 4 elements (Fire, Water, Earth, Air) of any one direction,
             OR
-        2. Collect all 4 directional variants (N/E/S/W) of any one element.
-    `
+        2. COLLECT all 4 directional variants (N/E/S/W) of any one element.
+
+🎲 Gameplay:
+    1. Roll a die to determine how many spaces you can move
+    2. When you have 0 moves, FIGHT on the space you landed on
+            `,`
+⚔️ Fight Rules:
+    1. Each player picks a CARD from their HAND
+    2. Both players draw a new CARD from their DECK that gets added to their HAND
+    3. Elemental advantage rules:
+            Fire 🔥 beats Air 💨
+            Earth 🌱 beats Water 💧
+            Air 💨 beats Earth 🌱
+            Water 💧 beats Fire 🔥
+            Plus, the space's element gets an advantage:
+                On an Earth space, Earth also beats Fire
+                On a Water space, Water also beats Air
+                On a Fire space, Fire also beats Earth
+                On an Air space, Air also beats Water
+    4. If both players play the same element, the higher number wins
+    5. If the elements played are not menitoned above:
+            On an ALL element space, higher number wins, otherwise a tie occurs (go to step 1)
+    7. The winner COLLECTS the card they played 
+            `,`
+🃏 Cards, Hands, Decks:
+    CARDS have:
+        1. A value (2-8)
+        2. An element (Air, Water, Earth, Fire)
+        3. A direction (North, East, South, West)
+    Each player's starting DECK has 56 cards:
+        7 numbers x 4 elements × 4 directions
+    Players start with 7 CARDS in their HAND, randomly drawn from their DECK
+    An additional eight CARDS of value 9 can be added to your DECK from winning games 
+    (coming soon)
+            `]
+
+        this.infoImage = this.add.image(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 'main-screen-info').setScale(3/8).setVisible(false);
+        
         this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*1/8, title, {
-            fontSize: '32px',
+            fontSize: '34px',
             fontFamily: 'Arial',
             color: '#000000',
             backgroundColor: '#FFFFFF',
             padding: { x: 10, y: 5 },
             align: 'center'
         }).setOrigin(0.5);
-        this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, instructions, {
-            fontSize: '16px',
+        let instructions = this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, instructionText[this.page], {
+            fontSize: '22px',
             fontFamily: 'Arial',
             color: '#000000',
             backgroundColor: '#FFFFFF',
@@ -129,10 +152,10 @@ export class Instructions extends Phaser.Scene {
             align: 'left'
         }).setOrigin(0.5);
 
-        this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*7/8, 
-            "Back <", 
+        this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*7/8-24, 
+            "Next >", 
             {
-            fontSize: '32px',
+            fontSize: '30px',
             fontFamily: 'Arial',
             color: '#000000',
             backgroundColor: '#FFFFFF',
@@ -140,7 +163,38 @@ export class Instructions extends Phaser.Scene {
             align: 'center'
             }
         ).setOrigin(0.5).setInteractive().on('pointerdown', () => {
-            this.scene.start('Menu');
+            if (this.page < instructionText.length - 1) {
+                this.page++;
+                instructions.setText(instructionText[this.page]);
+            } else if (this.page == instructionText.length - 1) {
+                this.page++;
+                instructions.setVisible(false);
+                this.infoImage.setVisible(true);
+            } else {
+                this.scene.start('Menu');
+            }
+        });
+        this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*7/8+36, 
+            "Back <", 
+            {
+            fontSize: '30px',
+            fontFamily: 'Arial',
+            color: '#000000',
+            backgroundColor: '#FFFFFF',
+            padding: { x: 10, y: 5 },
+            align: 'center'
+            }
+        ).setOrigin(0.5).setInteractive().on('pointerdown', () => {
+            if (this.page > 0) {
+                if (this.page == instructionText.length) {
+                    this.infoImage.setVisible(false);
+                    instructions.setVisible(true);
+                }
+                this.page--;
+                instructions.setText(instructionText[this.page]);
+            } else {
+                this.scene.start('Menu');
+            }
         });
     }
 }

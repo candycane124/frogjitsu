@@ -270,8 +270,8 @@ export class Player {
     }
 
     checkWin() {
-        console.log(`checking if ${this.name} has won`);
-        console.log(this.collection);
+        // console.log(`checking if ${this.name} has won`);
+        // console.log(this.collection);
         let avatarWin = this.collection.some(item => 
             item[Elements.FIRE] === 1 &&
             item[Elements.AIR] === 1 &&
@@ -334,6 +334,12 @@ export function Fight(p1,p2,spaceElement) {
         return p1;
     } else if (winsAgainst[c2.getData("element")] == c1.getData("element")) {
         return p2;
+    }
+    if (spaceElement == Elements.ALL) { // for all element space, winner is higher value
+        if (c1.getData("value") == c2.getData("value")) {
+            return null
+        }
+        return c1.getData("value") > c2.getData("value") ? p1 : p2;
     }
     return null;
 }

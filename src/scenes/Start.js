@@ -3,8 +3,6 @@ FrogJitsu
 Angela Huang
 
 to-do:
-() [feat] add info text
-() [feat] all element fight
 () [epic][feat] frog character customization
     - create accessories for frogs
     - customize character on menu screen
@@ -31,7 +29,8 @@ completed:
 (x) [dev] add to github & move to vscode
 (x) [enhance] update card directions to be black
 (x) [feat][art] all element tile
-(x) [epic][feat] board movement
+(x) [epic][feat] board movement(x) [feat] add info text
+(x) [feat] all element fight
 */
 
 import { Elements, Player, Fight, SCREEN_HEIGHT, SCREEN_WIDTH } from './Common.js';
@@ -84,6 +83,11 @@ export class Start extends Phaser.Scene
         for (let i = 0; i <= 6; i++) {
             this.load.image('dice-'+i.toString(),'assets/die/dice-'+i.toString()+'.png');
         }
+        this.load.image('info-fire','assets/info/element-info-fire.png');
+        this.load.image('info-water','assets/info/element-info-water.png');
+        this.load.image('info-earth','assets/info/element-info-earth.png');
+        this.load.image('info-air','assets/info/element-info-air.png');
+        this.load.image('info-all','assets/info/element-info-all.png');
     }
 
     create()
@@ -218,7 +222,8 @@ export class Start extends Phaser.Scene
             'fire': "0xEAA",
             'earth': "0xAEA",
             'water': "0xAAE",
-            'air': "0xEEA"
+            'air': "0xEEA",
+            'all': "0xEEE",
         }
 
         this.cameras.main.setBackgroundColor(bgcolours[this.spaceElement]);
@@ -232,6 +237,8 @@ export class Start extends Phaser.Scene
         this.p2.renderCollection(SCREEN_MIDDLE_X,COMP_COLLECTION_Y,0);
 
         this.dice.destroy();
+
+        this.info = this.add.image(SCREEN_WIDTH*7/8,SCREEN_HEIGHT*1/4,'info-' + this.spaceElement).setScale(SPACE_SCALE);
     }
 
     #triggerFight() {
@@ -283,6 +290,7 @@ export class Start extends Phaser.Scene
             this.p1.setCharacterVisible(true);
             this.p2.setCharacterVisible(true);
             this.#generateDice();
+            this.info.destroy();
         }
     }
 
