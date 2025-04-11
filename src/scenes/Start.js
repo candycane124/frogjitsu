@@ -3,15 +3,17 @@ FrogJitsu
 Angela Huang
 
 to-do:
+() [epic][feat] powerups
+    - spawn random powerup on appropriate space after fight
+    - player picks up powerup when they land on it
+    - update Fight to consider powerups
+    - more assets
 () [epic][feat] frog character customization
     - create accessories for frogs
     - customize character on menu screen
 () [epic][feat] multiplayer
 () [dev][enhance] direction message for win by 4 elements of a direction
 () [feat][enhance] keyboard movement: wasd & arrow keys to move on board
-() [epic][feat] powerups
-    - assets
-    -
 
 completed:
 (x) implement fight function to compare cards

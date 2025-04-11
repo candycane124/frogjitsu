@@ -17,6 +17,25 @@ export const Directions = {
 export const SCREEN_WIDTH = 1024;
 export const SCREEN_HEIGHT = 768;
 
+export const Powerups = {
+    [Elements.FIRE]: [
+        {'name': "heat", 'description': "+2 value to your equipped card", 'type': "card", 'value': 2},
+        {'name': "lightning", 'description': "-2 value to opponent's equipped card", 'type': "card", 'value': -2},
+    ],
+    [Elements.AIR]: [
+        {'name': "flight", 'description': "+2 value to your equipped card", 'type': "card", 'value': 2},
+        {'name': "sound", 'description': "-2 value to opponent's equipped card", 'type': "card", 'value': -2},
+    ],
+    [Elements.WATER]: [
+        {'name': "plant", 'description': "+2 value to your equipped card", 'type': "card", 'value': 2},
+        {'name': "steam", 'description': "-2 value to opponent's equipped card", 'type': "card", 'value': -2},
+    ],
+    [Elements.EARTH]: [
+        {'name': "metal", 'description': "+2 value to your equipped card", 'type': "card", 'value': 2},
+        {'name': "sand", 'description': "-2 value to opponent's equipped card", 'type': "card", 'value': -2},
+    ]
+}
+
 export class Frog {
 
 };
