@@ -14,15 +14,19 @@ export const Directions = {
     WEST: 'west'
 };
 
+export const SCREEN_WIDTH = 1024;
+export const SCREEN_HEIGHT = 768;
+
 export class Frog {
 
 };
 
-const CARD_WIDTH = 96;
+const CARD_SCALE = 0.0625;
+const CARD_SIZE = 64;
 const GAP = 16;
 
 export class Player {
-    constructor(name,scene,equipX,equipY = 336, handSize = 7) {
+    constructor(name, frog, scene, x, y, equipX, equipY = SCREEN_HEIGHT/2, handSize = 7) {
         this.name = name;
         // this.avatar = avatar;
         this.scene = scene;
@@ -42,12 +46,38 @@ export class Player {
         this.equipped = null;
         this.equipX = equipX;
         this.equipY = equipY;
+        this.character = scene.add.image(x,y,frog).setScale(0.05);
+        this.moves = 0;
+    }
+
+    getMoves() {
+        return this.moves
+    }
+
+    setMoves(amt) {
+        this.moves = amt;
+    }
+
+    modifyMoves(amt) {
+        this.moves += amt;
+    }
+
+    moveCharacter(x,y) {
+        this.character.setPosition(x,y);
+    }
+
+    getCharacterPos() {
+        return [this.character.x,this.character.y]
+    }
+
+    setCharacterVisible(visible) {
+        this.character.setVisible(visible);
     }
 
     #createCard(scene, value, element, direction, x = 0, y = 0) {
-        let baseNum = scene.add.image(0,0,'card-'+value.toString()).setScale(0.09375).setOrigin(0,0);
-        let elementIcon = scene.add.image(0,0,'card-'+element).setScale(0.09375).setOrigin(0,0);
-        let directionMarker = scene.add.image(0,0,'card-'+direction).setScale(0.09375).setOrigin(0,0);
+        let baseNum = scene.add.image(0,0,'card-'+value.toString()).setScale(CARD_SCALE);
+        let elementIcon = scene.add.image(0,0,'card-'+element).setScale(CARD_SCALE);
+        let directionMarker = scene.add.image(0,0,'card-'+direction).setScale(CARD_SCALE);
 
         let cardGroup = scene.add.container(x, y).setData({
             "value": value,
@@ -70,13 +100,6 @@ export class Player {
             for (let element of elements) {
                 for (let direction of directions) {
                     let card = this.#createCard(scene,value,element,direction);
-                    // let card = scene.add.image(0,0,'card-'+value.toString()).setScale(0.09375).setOrigin(0,0).setInteractive({
-                    //                 draggable: true
-                    //             }).setData({
-                    //                 "value": value,
-                    //                 "element": element,
-                    //                 "direction": direction
-                    //             }).setVisible(false);
                     deck.push(card);
                 }
             }
@@ -114,14 +137,13 @@ export class Player {
     renderHand(x, y, clickable) {
         // console.log(`${this.name} - rendering hand at (${x},${y})`);
 
-        const totalWidth = this.handSize * CARD_WIDTH + (this.handSize - 1) * GAP;
-        x = x - totalWidth/2;
+        const totalWidth = this.handSize * CARD_SIZE + (this.handSize - 1) * GAP;
+        const startX = x - totalWidth / 2;
 
         for (let i = 0; i < this.handSize; i++) {
-            let cardX = x+i*(CARD_WIDTH+GAP);
-            let cardY = y-CARD_WIDTH/2;
+            let cardX = startX+i*(CARD_SIZE+GAP)+CARD_SIZE/2;
             let card = this.hand[i];
-            card.setPosition(cardX,cardY);
+            card.setPosition(cardX, y);
             card.setVisible(true);
 
             if (clickable) {
@@ -163,12 +185,13 @@ export class Player {
         this.collection[directionToNum[card.getData("direction")]][card.getData("element")] = 1;
     }
     
-    renderCollection(x, y, textDirection, squareSize = 64) {
-        // x, y is the middle, top of where the box will be rendered
+    renderCollection(x, y, textDirection, squareSize = 48) {
+        // x, y is the middle of where the boxes will be rendered
         // textdirection = 0 means text will be under box, 1 means text will be above
         // squaresize is the size of one 2x2 direction box
         const totalWidth = 4 * squareSize + 3 * GAP;
-        x = x - totalWidth/2;
+        const startX = x - totalWidth / 2;
+        const squareY = y - squareSize / 2;
 
         this.collectionObjects = []; 
 
@@ -176,16 +199,17 @@ export class Player {
 
         for (let i = 0; i < 4; i++) {
             let text;
+            console.log(y + squareSize/2 + 4, y - squareSize/2 - 4);
             if (textDirection == 0) {
-                text = this.scene.add.text(x + (squareSize + GAP) * i + squareSize/2, y + squareSize, directions[i], {
-                    fontSize: '16px',
+                text = this.scene.add.text(startX + (squareSize + GAP) * i + squareSize/2, y + squareSize/2 + 4, directions[i], {
+                    fontSize: '14px',
                     fontFamily: 'Arial',
                     color: '#000000',
                     align: 'center'
                 }).setOrigin(0.5,0);
             } else {
-                text = this.scene.add.text(x + (squareSize + GAP) * i + squareSize/2, y, directions[i], {
-                    fontSize: '16px',
+                text = this.scene.add.text(startX + (squareSize + GAP) * i + squareSize/2, y - squareSize/2 - 4, directions[i], {
+                    fontSize: '14px',
                     fontFamily: 'Arial',
                     color: '#000000',
                     align: 'center'
@@ -195,8 +219,8 @@ export class Player {
             this.collectionObjects.push(text);
 
             const squares = this.createFourSquare(
-                x + (squareSize + GAP) * i, 
-                y, 
+                startX + (squareSize + GAP) * i, 
+                squareY, 
                 squareSize, 
                 this.collection[i]
             );
@@ -246,8 +270,8 @@ export class Player {
     }
 
     checkWin() {
-        console.log(`checking if ${this.name} has won`);
-        console.log(this.collection);
+        // console.log(`checking if ${this.name} has won`);
+        // console.log(this.collection);
         let avatarWin = this.collection.some(item => 
             item[Elements.FIRE] === 1 &&
             item[Elements.AIR] === 1 &&
@@ -310,6 +334,12 @@ export function Fight(p1,p2,spaceElement) {
         return p1;
     } else if (winsAgainst[c2.getData("element")] == c1.getData("element")) {
         return p2;
+    }
+    if (spaceElement == Elements.ALL) { // for all element space, winner is higher value
+        if (c1.getData("value") == c2.getData("value")) {
+            return null
+        }
+        return c1.getData("value") > c2.getData("value") ? p1 : p2;
     }
     return null;
 }
