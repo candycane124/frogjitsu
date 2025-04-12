@@ -4,7 +4,6 @@ Angela Huang
 
 to-do:
 () [epic][feat] powerups
-    - spawn random powerup on appropriate space after fight
     - player picks up powerup when they land on it
     - update Fight to consider powerups
     - more assets
@@ -35,7 +34,7 @@ completed:
 (x) [feat] all element fight
 */
 
-import { Elements, Player, Fight, SCREEN_HEIGHT, SCREEN_WIDTH } from './Common.js';
+import { Elements, Player, Fight, SCREEN_HEIGHT, SCREEN_WIDTH, Powerups } from './Common.js';
 
 const SCREEN_MIDDLE_X = SCREEN_WIDTH/2;
 const SCREEN_MIDDLE_Y = SCREEN_HEIGHT/2;
@@ -90,6 +89,14 @@ export class Start extends Phaser.Scene
         this.load.image('info-earth','assets/info/element-info-earth.png');
         this.load.image('info-air','assets/info/element-info-air.png');
         this.load.image('info-all','assets/info/element-info-all.png');
+        const elements = [Elements.FIRE, Elements.AIR, Elements.WATER, Elements.EARTH];
+        for (let e of elements) {
+            for (let i in Powerups[e]) {
+                const powerupName = Powerups[e][i]['name'];
+                const filePath = `assets/powerups/${e}/powerup-${powerupName}.png`;
+                this.load.image(`powerup-${powerupName}`, filePath);
+            }
+        }
     }
 
     create()
@@ -122,6 +129,8 @@ export class Start extends Phaser.Scene
         // });
 
         this.#generateDice();
+
+        this.powerup = null;
     }
 
     #generateDice() {
@@ -180,6 +189,7 @@ export class Start extends Phaser.Scene
         }
         spaces.splice(4, 0, Elements.ALL);
 
+        this.mapList = spaces;
         console.log(spaces)
 
         let anchorX = SCREEN_MIDDLE_X-SPACE_SIZE;
@@ -194,10 +204,6 @@ export class Start extends Phaser.Scene
                 });
                 space.on('pointerdown', () => {
                     this.#movePlayer(this.p1,anchorX+SPACE_SIZE*j,anchorY+SPACE_SIZE*i,currentElement);
-                    // this.p1.moveCharacter(anchorX+SPACE_SIZE*j,anchorY+SPACE_SIZE*i);
-                    // console.log(`Clicked on space with element: ${currentElement}`);
-                    // this.spaceElement = currentElement;
-                    // this.#startFightScene();
                 });
             }
         }
@@ -217,8 +223,20 @@ export class Start extends Phaser.Scene
         });
     }
 
+    #generatePowerup() {
+        let randPowerup = Math.floor(Math.random()*2);
+        let randSpace = Math.floor(Math.random()*8);
+        if (randSpace >= 4) {
+            randSpace += 1;
+        }
+        let x = randSpace%3*SPACE_SIZE+SCREEN_MIDDLE_X-SPACE_SIZE;
+        let y = Math.floor(randSpace/3)*SPACE_SIZE+SCREEN_MIDDLE_Y-SPACE_SIZE;
+        console.log(`powerup type ${randPowerup} at (${x},${y}) on element ${this.mapList[randSpace]}`);
+        this.powerup = this.add.image(x,y,'powerup-'+Powerups[this.mapList[randSpace]][randPowerup]['name']).setScale(SPACE_SCALE/2);
+    }
+
     #startFightScene() {
-        console.log("Fight scene initializing...");
+        // console.log("Fight scene initializing...");
 
         let bgcolours = {
             'fire': "0xEAA",
@@ -229,6 +247,11 @@ export class Start extends Phaser.Scene
         }
 
         this.cameras.main.setBackgroundColor(bgcolours[this.spaceElement]);
+
+        if (this.powerup) {
+            this.powerup.destroy();
+            this.powerup = null;
+        }
 
         this.#showBoard(false);
         this.p1.setCharacterVisible(false);
@@ -268,12 +291,22 @@ export class Start extends Phaser.Scene
            
             this.fightInProgress = false;
             if (winner) {
+                this.#checkWinner();
+
                 this.#showBoard(true);
+                this.#generatePowerup();
+                
                 this.p1.hand.forEach(card => card.setVisible(false));
                 this.p2.hand.forEach(card => card.setVisible(false));
                 this.p1.renderHand(SCREEN_MIDDLE_X,PLAYER_HAND_Y,false);
                 this.p2.destroyCollection();
-                this.#checkWinner();
+
+                this.cameras.main.setBackgroundColor('#DDD');
+                this.p1.setCharacterVisible(true);
+                this.p2.setCharacterVisible(true);
+                this.#generateDice();
+
+                this.info.destroy();
             } else {
                 this.p1.renderHand(SCREEN_MIDDLE_X, PLAYER_HAND_Y, true);
                 this.p2.renderHand(SCREEN_MIDDLE_X, COMP_HAND_Y, false);
@@ -287,12 +320,6 @@ export class Start extends Phaser.Scene
         }
         else if (this.p2.checkWin()) {
             this.scene.start('End', { won: false });
-        } else {
-            this.cameras.main.setBackgroundColor('#DDD');
-            this.p1.setCharacterVisible(true);
-            this.p2.setCharacterVisible(true);
-            this.#generateDice();
-            this.info.destroy();
         }
     }
 
