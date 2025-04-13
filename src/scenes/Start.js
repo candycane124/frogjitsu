@@ -4,12 +4,12 @@ Angela Huang
 
 to-do:
 () [epic][feat] powerups
-    - player picks up powerup when they land on it
     - update Fight to consider powerups
     - more assets
-() [epic][feat] frog character customization
+() [epic][feat] character customization
     - create accessories for frogs
     - customize character on menu screen
+    - username input
 () [epic][feat] multiplayer
 () [dev][enhance] direction message for win by 4 elements of a direction
 () [feat][enhance] keyboard movement: wasd & arrow keys to move on board
@@ -168,6 +168,13 @@ export class Start extends Phaser.Scene
             const movesLeft = p.getMoves();
             if (this.dice) {
                 this.dice.setTexture('dice-' + movesLeft);
+            }
+
+            if (this.powerup && this.powerup.x === x && this.powerup.y === y) {
+                console.log(`${p.name} collected a powerup!`);
+                p.setPowerup(this.powerup.texture.key);
+                this.powerup.destroy();
+                this.powerup = null;
             }
 
             if (movesLeft == 0) {

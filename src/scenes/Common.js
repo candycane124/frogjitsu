@@ -67,6 +67,7 @@ export class Player {
         this.equipY = equipY;
         this.character = scene.add.image(x,y,frog).setScale(0.05);
         this.moves = 0;
+        this.powerup = null;
     }
 
     getMoves() {
@@ -309,6 +310,10 @@ export class Player {
             }
         }
         return avatarWin || masterWin;
+    }
+
+    setPowerup(powerup) {
+        this.powerup = powerup;
     }
 }
 
