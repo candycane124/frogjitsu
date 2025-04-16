@@ -5,14 +5,21 @@ Angela Huang
 to-do:
 () [epic][feat] powerups
     - update Fight to consider powerups
-    - more assets
+    - don't spawn powerup on character
+    - add info in menu screen for powerups
 () [epic][feat] character customization
     - create accessories for frogs
     - customize character on menu screen
     - username input
 () [epic][feat] multiplayer
+    - research...
 () [dev][enhance] direction message for win by 4 elements of a direction
 () [feat][enhance] keyboard movement: wasd & arrow keys to move on board
+() [epic][feat] powerups 2.0
+    - improve powerups
+    - add in-fight info for any current powerup that will be applied
+    - hand size powerups: assets, spawn, collect, apply
+    - discard card powerups: assets, spawn, collect, apply
 
 completed:
 (x) implement fight function to compare cards
@@ -171,7 +178,7 @@ export class Start extends Phaser.Scene
             }
 
             if (this.powerup && this.powerup.x === x && this.powerup.y === y) {
-                console.log(`${p.name} collected a powerup!`);
+                console.log(`${p.name} got a powerup: ${this.powerup.texture.key}!`);
                 p.setPowerup(this.powerup.texture.key);
                 this.powerup.destroy();
                 this.powerup = null;
@@ -307,6 +314,9 @@ export class Start extends Phaser.Scene
                 this.p2.hand.forEach(card => card.setVisible(false));
                 this.p1.renderHand(SCREEN_MIDDLE_X,PLAYER_HAND_Y,false);
                 this.p2.destroyCollection();
+
+                this.p1.setPowerup(null);
+                this.p2.setPowerup(null);
 
                 this.cameras.main.setBackgroundColor('#DDD');
                 this.p1.setCharacterVisible(true);

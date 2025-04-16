@@ -20,19 +20,19 @@ export const SCREEN_HEIGHT = 768;
 export const Powerups = {
     [Elements.FIRE]: [
         {'name': "heat", 'description': "+2 value to your equipped card", 'type': "card", 'value': 2},
-        {'name': "lightning", 'description': "-2 value to opponent's equipped card", 'type': "card", 'value': -2},
+        {'name': "lightning", 'description': "-2 value to opponent's equipped card", 'type': "card", 'value': 2},
     ],
     [Elements.AIR]: [
         {'name': "flight", 'description': "+2 value to your equipped card", 'type': "card", 'value': 2},
-        {'name': "sound", 'description': "-2 value to opponent's equipped card", 'type': "card", 'value': -2},
+        {'name': "sound", 'description': "-2 value to opponent's equipped card", 'type': "card", 'value': 2},
     ],
     [Elements.WATER]: [
         {'name': "plant", 'description': "+2 value to your equipped card", 'type': "card", 'value': 2},
-        {'name': "steam", 'description': "-2 value to opponent's equipped card", 'type': "card", 'value': -2},
+        {'name': "steam", 'description': "-2 value to opponent's equipped card", 'type': "card", 'value': 2},
     ],
     [Elements.EARTH]: [
         {'name': "metal", 'description': "+2 value to your equipped card", 'type': "card", 'value': 2},
-        {'name': "sand", 'description': "-2 value to opponent's equipped card", 'type': "card", 'value': -2},
+        {'name': "sand", 'description': "-2 value to opponent's equipped card", 'type': "card", 'value': 2},
     ]
 }
 
@@ -201,7 +201,7 @@ export class Player {
             [Directions.SOUTH]: 2,
             [Directions.WEST]: 3,
         }
-        console.log(`${this.name} collected ${card}!`);
+        console.log(`${this.name} collected ${card.getData("direction")} ${card.getData("element")}!`);
         this.collection[directionToNum[card.getData("direction")]][card.getData("element")] = 1;
     }
     
@@ -219,7 +219,6 @@ export class Player {
 
         for (let i = 0; i < 4; i++) {
             let text;
-            console.log(y + squareSize/2 + 4, y - squareSize/2 - 4);
             if (textDirection == 0) {
                 text = this.scene.add.text(startX + (squareSize + GAP) * i + squareSize/2, y + squareSize/2 + 4, directions[i], {
                     fontSize: '14px',
@@ -337,16 +336,37 @@ export function Fight(p1,p2,spaceElement) {
     let c2 = p2.equipped;
 
     console.log("fight!");
+    console.log(p1.powerup,p2.powerup);
+    console.log("p1 card:", c1.getData("value"), c1.getData("element"), c1.getData("direction"));
     console.log("p2 card:", c2.getData("value"), c2.getData("element"), c2.getData("direction"));
+
+    let c1EffectiveVal = c1.getData("value");
+    let c2EffectiveVal = c2.getData("value");
+    // scuffed rn
+    const elements = [Elements.FIRE, Elements.AIR, Elements.WATER, Elements.EARTH];
+    for (let e of elements) {
+        for (let i in Powerups[e]) {
+            const powerupFullname = 'powerup-' + Powerups[e][i]['name'];
+            // console.log(e,i,powerupFullname);
+            if (p1.powerup == powerupFullname) {
+                c1EffectiveVal += Powerups[e][i]['value'];
+                // console.log("+2 powerup applied for p1 from ",powerupFullname);
+            } else if (p2.powerup == powerupFullname) {
+                c2EffectiveVal += Powerups[e][i]['value'];
+                // console.log("+2 powerup applied for p2 from ",powerupFullname);
+            }
+        }
+    }
+
 
     if (!c1) {
         return c2;
     }
     if (c1.getData("element") == c2.getData("element")) {
-        if (c1.getData("value") == c2.getData("value")) {
+        if (c1EffectiveVal == c2EffectiveVal) {
             return null;
         } else {
-            return c1.getData("value") > c2.getData("value") ? p1 : p2;
+            return c1EffectiveVal > c2EffectiveVal ? p1 : p2;
         }
     }
     if (c1.getData("element") == spaceElement) {
@@ -360,10 +380,10 @@ export function Fight(p1,p2,spaceElement) {
         return p2;
     }
     if (spaceElement == Elements.ALL) { // for all element space, winner is higher value
-        if (c1.getData("value") == c2.getData("value")) {
+        if (c1EffectiveVal == c2EffectiveVal) {
             return null
         }
-        return c1.getData("value") > c2.getData("value") ? p1 : p2;
+        return c1EffectiveVal > c2EffectiveVal ? p1 : p2;
     }
     return null;
 }
