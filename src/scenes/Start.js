@@ -3,23 +3,20 @@ FrogJitsu
 Angela Huang
 
 to-do:
-() [epic][feat] powerups
-    - update Fight to consider powerups
-    - don't spawn powerup on character
-    - add info in menu screen for powerups
 () [epic][feat] character customization
     - create accessories for frogs
     - customize character on menu screen
     - username input
+() [bug] collection text keeps rerendering on top of each other making bold text
 () [epic][feat] multiplayer
     - research...
-() [dev][enhance] direction message for win by 4 elements of a direction
 () [feat][enhance] keyboard movement: wasd & arrow keys to move on board
 () [epic][feat] powerups 2.0
-    - improve powerups
     - add in-fight info for any current powerup that will be applied
+    - change card to show effective value after equipped
     - hand size powerups: assets, spawn, collect, apply
     - discard card powerups: assets, spawn, collect, apply
+() [dev][enhance] direction message for win by 4 elements of a direction
 
 completed:
 (x) implement fight function to compare cards
@@ -39,6 +36,7 @@ completed:
 (x) [feat][art] all element tile
 (x) [epic][feat] board movement(x) [feat] add info text
 (x) [feat] all element fight
+(x) [epic][feat] powerups
 */
 
 import { Elements, Player, Fight, SCREEN_HEIGHT, SCREEN_WIDTH, Powerups } from './Common.js';
@@ -238,10 +236,14 @@ export class Start extends Phaser.Scene
     }
 
     #generatePowerup() {
+        const p1Pos = this.p1.getCharacterPos();
+        let px = (p1Pos[0]+SPACE_SIZE-SCREEN_MIDDLE_X)/SPACE_SIZE
+        let py = (p1Pos[1]+SPACE_SIZE-SCREEN_MIDDLE_Y)/SPACE_SIZE
+        // console.log(px,py)
         let randPowerup = Math.floor(Math.random()*2);
-        let randSpace = Math.floor(Math.random()*8);
-        if (randSpace >= 4) {
-            randSpace += 1;
+        let randSpace = Math.floor(Math.random()*9);
+        while (randSpace == 4 || randSpace == px+py*3) {
+            randSpace = Math.floor(Math.random()*9);
         }
         let x = randSpace%3*SPACE_SIZE+SCREEN_MIDDLE_X-SPACE_SIZE;
         let y = Math.floor(randSpace/3)*SPACE_SIZE+SCREEN_MIDDLE_Y-SPACE_SIZE;
