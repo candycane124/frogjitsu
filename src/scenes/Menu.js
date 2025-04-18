@@ -25,8 +25,29 @@ export class Menu extends Phaser.Scene
     {
         this.cameras.main.setBackgroundColor('#DDD');
 
-        this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*1/4, 
-            "CHOOSE YOUR FROG", 
+        this.add.text(SCREEN_WIDTH*1/4, SCREEN_HEIGHT*3/32, 
+            "Username:", 
+            {
+            fontSize: '32px',
+            fontFamily: 'Arial',
+            color: '#000000',
+            backgroundColor: '#FFFFFF',
+            padding: { x: 10, y: 5 },
+            align: 'left'
+            }
+        ).setOrigin(0.5);
+
+        const inputBox = this.add.dom(SCREEN_WIDTH*1/4, SCREEN_HEIGHT*6/32).createFromHTML(`
+            <input type="text" id="username-input" placeholder="Player" style="
+                font-size: 20px;
+                padding: 10px;
+                width: 300px;
+                text-align: center;
+            ">
+        `);
+
+        this.add.text(SCREEN_WIDTH*1/4, SCREEN_HEIGHT*9/32, 
+            "Customize your frog:", 
             {
             fontSize: '32px',
             fontFamily: 'Arial',
@@ -59,11 +80,12 @@ export class Menu extends Phaser.Scene
         ];
 
         frogs.forEach(frog => {
-            let highlight = this.add.rectangle(frog.x, SCREEN_HEIGHT/2, 200, 200, 0xdddd99, 0.5).setVisible(false);
+            let highlight = this.add.rectangle(frog.x, SCREEN_HEIGHT*18/32, 200, 200, 0xdddd99, 0.5).setVisible(false);
             
-            let sprite = this.add.image(frog.x, SCREEN_HEIGHT/2, frog.key).setScale(FROG_SCALE).setInteractive();
+            let sprite = this.add.image(frog.x, SCREEN_HEIGHT*18/32, frog.key).setScale(FROG_SCALE).setInteractive();
             sprite.on('pointerdown', () => {
-                this.scene.start('Start', { selectedFrog: frog.key });
+                const username = document.getElementById('username-input').value;
+                this.scene.start('Start', { selectedFrog: frog.key, username: username });
             });
 
             sprite.on('pointerover', () => {

@@ -3,10 +3,12 @@ FrogJitsu
 Angela Huang
 
 to-do:
-() [epic][feat] character customization
-    - create accessories for frogs
-    - customize character on menu screen
-    - username input
+() [epic][feat] player customization
+    - create assets for frogs
+        - tops: tophat, cowboy hat, crown, tiara, party hat, chef’s hat
+        - accessories: bowtie, tie, gold chain, pearls, necklace, scarf
+    - revamp menu sccreen to allow character customization
+    - save custom frog and send to main game screen
 () [bug] collection text keeps rerendering on top of each other making bold text
 () [epic][feat] multiplayer
     - research...
@@ -65,6 +67,7 @@ export class Start extends Phaser.Scene
 
     init(data) {
         this.selectedFrog = data.selectedFrog || 'frog-blue';
+        this.username = data.username || 'Player';
     }
 
     preload()
@@ -118,7 +121,7 @@ export class Start extends Phaser.Scene
 
         this.#generateBoard(spawns);
 
-        this.p1 = new Player("candycane123",this.selectedFrog,this,spawns[randSpawn][0],spawns[randSpawn][1],PLAYER_EQUIP_X,SCREEN_MIDDLE_Y,7);
+        this.p1 = new Player(this.username,this.selectedFrog,this,spawns[randSpawn][0],spawns[randSpawn][1],PLAYER_EQUIP_X,SCREEN_MIDDLE_Y,7);
         this.p2 = new Player("Computer",'frog-gray',this,spawns[compSpawn][0],spawns[compSpawn][1],COMP_EQUIP_X);
 
 
