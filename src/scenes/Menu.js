@@ -14,15 +14,21 @@ export class Menu extends Phaser.Scene
 
     preload()
     {
-        this.load.image('frog-blue','assets/frogs/frog-blue.png');
-        this.load.image('frog-green','assets/frogs/frog-green.png');
-        this.load.image('frog-red','assets/frogs/frog-red.png');
-        this.load.image('frog-yellow','assets/frogs/frog-yellow.png');
-        this.load.image('frog-gray','assets/frogs/frog-gray.png')
+        this.load.image('frog-blue','assets/frogs/colours/frog-blue.png');
+        this.load.image('frog-green','assets/frogs/colours/frog-green.png');
+        this.load.image('frog-red','assets/frogs/colours/frog-red.png');
+        this.load.image('frog-yellow','assets/frogs/colours/frog-yellow.png');
+        this.load.image('frog-gray','assets/frogs/colours/frog-gray.png');
     }
 
     create()
     {
+        this.frog = {
+            "colour": "frog-blue",
+            "hat": null,
+            "accessory": null,
+        }
+
         this.cameras.main.setBackgroundColor('#DDD');
 
         this.add.text(SCREEN_WIDTH*1/4, SCREEN_HEIGHT*3/32, 
@@ -46,7 +52,22 @@ export class Menu extends Phaser.Scene
             ">
         `);
 
-        this.add.text(SCREEN_WIDTH*1/4, SCREEN_HEIGHT*9/32, 
+        this.add.text(SCREEN_WIDTH*3/4, SCREEN_HEIGHT*6/32, 
+            "PLAY >", 
+            {
+            fontSize: '32px',
+            fontFamily: 'Arial',
+            color: '#000000',
+            backgroundColor: '#FFFFFF',
+            padding: { x: 10, y: 5 },
+            align: 'center'
+            }
+        ).setOrigin(0.5).setInteractive().on('pointerdown', () => {
+            const username = document.getElementById('username-input').value;
+            this.scene.start('Start', { selectedFrog: this.frog["colour"], username: username });
+        });
+
+        this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*9/32, 
             "Customize your frog:", 
             {
             fontSize: '32px',
@@ -58,7 +79,39 @@ export class Menu extends Phaser.Scene
             }
         ).setOrigin(0.5);
 
-        this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*7/8-24, 
+        const colours = ['frog-blue','frog-green','frog-red','frog-yellow'];
+        let currColour = 0;
+
+        let frogSprite = this.add.image(SCREEN_WIDTH/2, SCREEN_HEIGHT*18/32, colours[currColour]).setScale(FROG_SCALE);
+
+        this.add.text(SCREEN_WIDTH*1/4, SCREEN_HEIGHT*18/32, "<", {
+            fontSize: '48px',
+            fontFamily: 'Arial',
+            color: '#000000',
+            backgroundColor: '#FFFFFF',
+            padding: { x: 10, y: 5 },
+            align: 'center'
+        }).setOrigin(0.5).setInteractive().on('pointerdown', () => {
+            currColour = (currColour - 1 + colours.length) % colours.length; // Cycle backward
+            frogSprite.setTexture(colours[currColour]); // Update the displayed frog
+            this.frog["colour"] = colours[currColour];
+        });
+    
+        // Add right navigation button
+        this.add.text(SCREEN_WIDTH*3/4, SCREEN_HEIGHT*18/32, ">", {
+            fontSize: '48px',
+            fontFamily: 'Arial',
+            color: '#000000',
+            backgroundColor: '#FFFFFF',
+            padding: { x: 10, y: 5 },
+            align: 'center'
+        }).setOrigin(0.5).setInteractive().on('pointerdown', () => {
+            currColour = (currColour + 1) % colours.length; // Cycle forward
+            frogSprite.setTexture(colours[currColour]); // Update the displayed frog
+            this.frog["colour"] = colours[currColour];
+        });
+
+        this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*27/32, 
             "How to play?", 
             {
             fontSize: '32px',
@@ -72,29 +125,25 @@ export class Menu extends Phaser.Scene
             this.scene.start('Instructions');
         });
 
-        const frogs = [
-            { key: 'frog-blue', x: SCREEN_WIDTH/2-GAP*3/2-FROG_SIZE*3/2 },
-            { key: 'frog-green', x: SCREEN_WIDTH/2-GAP/2-FROG_SIZE/2 },
-            { key: 'frog-red', x: SCREEN_WIDTH/2+GAP/2+FROG_SIZE/2 },
-            { key: 'frog-yellow', x: SCREEN_WIDTH/2+GAP*3/2+FROG_SIZE*3/2 }
-        ];
+        // const frogs = [
+        //     { key: 'frog-blue', x: SCREEN_WIDTH/2-GAP*3/2-FROG_SIZE*3/2 },
+        //     { key: 'frog-green', x: SCREEN_WIDTH/2-GAP/2-FROG_SIZE/2 },
+        //     { key: 'frog-red', x: SCREEN_WIDTH/2+GAP/2+FROG_SIZE/2 },
+        //     { key: 'frog-yellow', x: SCREEN_WIDTH/2+GAP*3/2+FROG_SIZE*3/2 }
+        // ];
 
-        frogs.forEach(frog => {
-            let highlight = this.add.rectangle(frog.x, SCREEN_HEIGHT*18/32, 200, 200, 0xdddd99, 0.5).setVisible(false);
+        // frogs.forEach(frog => {
+        //     let highlight = this.add.rectangle(frog.x, SCREEN_HEIGHT*18/32, 200, 200, 0xdddd99, 0.5).setVisible(false);
             
-            let sprite = this.add.image(frog.x, SCREEN_HEIGHT*18/32, frog.key).setScale(FROG_SCALE).setInteractive();
-            sprite.on('pointerdown', () => {
-                const username = document.getElementById('username-input').value;
-                this.scene.start('Start', { selectedFrog: frog.key, username: username });
-            });
+        //     let sprite = this.add.image(frog.x, SCREEN_HEIGHT*18/32, frog.key).setScale(FROG_SCALE).setInteractive();
 
-            sprite.on('pointerover', () => {
-                highlight.setVisible(true);
-            });
-            sprite.on('pointerout', () => {
-                highlight.setVisible(false);
-            });
-        });
+        //     sprite.on('pointerover', () => {
+        //         highlight.setVisible(true);
+        //     });
+        //     sprite.on('pointerout', () => {
+        //         highlight.setVisible(false);
+        //     });
+        // });
     }
 }
 
@@ -183,7 +232,7 @@ export class Instructions extends Phaser.Scene {
             align: 'left'
         }).setOrigin(0.5);
 
-        this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*7/8-24, 
+        this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*27/32, 
             "Next >", 
             {
             fontSize: '30px',
@@ -205,7 +254,8 @@ export class Instructions extends Phaser.Scene {
                 this.scene.start('Menu');
             }
         });
-        this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*7/8+36, 
+
+        this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*29/32, 
             "Back <", 
             {
             fontSize: '30px',

@@ -7,10 +7,11 @@ to-do:
     - create assets for frogs
         - tops: tophat, cowboy hat, crown, tiara, party hat, chef’s hat
         - accessories: bowtie, tie, gold chain, pearls, necklace, scarf
-    - revamp menu sccreen to allow character customization
+    - add top & accessory customization
     - save custom frog and send to main game screen
+() [feat] exit game
 () [bug] collection text keeps rerendering on top of each other making bold text
-() [epic][feat] multiplayer
+() [epic][feat] multiplayer!
     - research...
 () [feat][enhance] keyboard movement: wasd & arrow keys to move on board
 () [epic][feat] powerups 2.0

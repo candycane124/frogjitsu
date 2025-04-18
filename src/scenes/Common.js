@@ -37,7 +37,11 @@ export const Powerups = {
 }
 
 export class Frog {
-
+    constructor(colour = null, hat = null, accessory = null) {
+        this.colour = colour;
+        this.hat = hat;
+        this.accessory = accessory;
+    }
 };
 
 const CARD_SCALE = 0.0625;
