@@ -4,12 +4,9 @@ Angela Huang
 
 to-do:
 () [epic][feat] player customization
-    - create assets for frogs
-        - tops: tophat, cowboy hat, crown, tiara, party hat, chef’s hat
-        - accessories: bowtie, tie, gold chain, pearls, necklace, scarf
-    - add top & accessory customization
     - save custom frog and send to main game screen
 () [feat] exit game
+() [feat] add in-game instructions for current game stage - roll dice, move your character, pick a card
 () [bug] collection text keeps rerendering on top of each other making bold text
 () [epic][feat] multiplayer!
     - research...
@@ -73,12 +70,15 @@ export class Start extends Phaser.Scene
 
     preload()
     {
+        // LOAD ASSETS
+        //spaces
         this.load.image('space-fire','assets/spaces/space-fire.png');
         this.load.image('space-water','assets/spaces/space-water.png');
         this.load.image('space-earth','assets/spaces/space-earth.png');
         this.load.image('space-air','assets/spaces/space-air.png');
         this.load.image('space-all','assets/spaces/space-all.png');
         this.load.image('space-none','assets/spaces/space-none.png');
+        //cards
         this.load.image('card-fire','assets/cards/card-fire.png');
         this.load.image('card-water','assets/cards/card-water.png');
         this.load.image('card-earth','assets/cards/card-earth.png');
@@ -90,14 +90,17 @@ export class Start extends Phaser.Scene
         for (let i = 0; i < 12; i++) {
             this.load.image('card-'+i.toString(),'assets/cards/card-'+i.toString()+'.png');
         }
+        //dice
         for (let i = 0; i <= 6; i++) {
             this.load.image('dice-'+i.toString(),'assets/die/dice-'+i.toString()+'.png');
         }
+        //info
         this.load.image('info-fire','assets/info/element-info-fire.png');
         this.load.image('info-water','assets/info/element-info-water.png');
         this.load.image('info-earth','assets/info/element-info-earth.png');
         this.load.image('info-air','assets/info/element-info-air.png');
         this.load.image('info-all','assets/info/element-info-all.png');
+        //powerups
         const elements = [Elements.FIRE, Elements.AIR, Elements.WATER, Elements.EARTH];
         for (let e of elements) {
             for (let i in Powerups[e]) {
