@@ -36,14 +36,6 @@ export const Powerups = {
     ]
 }
 
-export class Frog {
-    constructor(colour = null, hat = null, accessory = null) {
-        this.colour = colour;
-        this.hat = hat;
-        this.accessory = accessory;
-    }
-};
-
 const CARD_SCALE = 0.0625;
 const CARD_SIZE = 64;
 const GAP = 16;
@@ -69,9 +61,26 @@ export class Player {
         this.equipped = null;
         this.equipX = equipX;
         this.equipY = equipY;
-        this.character = scene.add.image(x,y,frog).setScale(0.05);
+        this.character = this.#createCharacter(scene, x, y, frog);
         this.moves = 0;
         this.powerup = null;
+    }
+
+    #createCharacter(scene, x, y, frog) {
+        let frogSprite = scene.add.image(0,0,frog.colour).setScale(0.05);
+
+        let hatSprite = frog.hat ? scene.add.image(0,-24,frog.hat).setScale(0.05) : null;
+        let accessorySprite = frog.accessory ? scene.add.image(0,0,frog.accessory).setScale(0.05) : null;
+
+        let characterContainer = scene.add.container(x,y,[frogSprite]);
+        if (hatSprite) {
+            characterContainer.add(hatSprite);
+        }
+        if (accessorySprite) {
+            characterContainer.add(accessorySprite);
+        }
+
+        return characterContainer;
     }
 
     getMoves() {

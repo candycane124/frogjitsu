@@ -4,7 +4,7 @@ Angela Huang
 
 to-do:
 () [epic][feat] player customization
-    - save custom frog and send to main game screen
+    - no accessory
 () [feat] exit game
 () [feat] add in-game instructions for current game stage - roll dice, move your character, pick a card
 () [bug] collection text keeps rerendering on top of each other making bold text
@@ -64,7 +64,7 @@ export class Start extends Phaser.Scene
     }
 
     init(data) {
-        this.selectedFrog = data.selectedFrog || 'frog-blue';
+        this.frog = data.frog
         this.username = data.username || 'Player';
     }
 
@@ -125,9 +125,13 @@ export class Start extends Phaser.Scene
 
         this.#generateBoard(spawns);
 
-        this.p1 = new Player(this.username,this.selectedFrog,this,spawns[randSpawn][0],spawns[randSpawn][1],PLAYER_EQUIP_X,SCREEN_MIDDLE_Y,7);
-        this.p2 = new Player("Computer",'frog-gray',this,spawns[compSpawn][0],spawns[compSpawn][1],COMP_EQUIP_X);
-
+        let computerFrog = {
+            "colour": "frog-gray",
+            "hat": null,
+            "accessory": null,
+        }
+        this.p1 = new Player(this.username,this.frog,this,spawns[randSpawn][0],spawns[randSpawn][1],PLAYER_EQUIP_X,SCREEN_MIDDLE_Y,7);
+        this.p2 = new Player("Computer",computerFrog,this,spawns[compSpawn][0],spawns[compSpawn][1],COMP_EQUIP_X);
 
         console.log(this.p1);
         console.log(this.p2);

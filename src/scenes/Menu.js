@@ -77,7 +77,7 @@ export class Menu extends Phaser.Scene
             }
         ).setOrigin(0.5).setInteractive().on('pointerdown', () => {
             const username = document.getElementById('username-input').value;
-            this.scene.start('Start', { selectedFrog: this.frog["colour"], username: username });
+            this.scene.start('Start', { frog: this.frog, username: username });
         });
 
         this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*9/32, 
