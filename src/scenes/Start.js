@@ -3,11 +3,9 @@ FrogJitsu
 Angela Huang
 
 to-do:
-() [epic][feat] player customization
-    - no accessory
 () [feat] exit game
-() [feat] add in-game instructions for current game stage - roll dice, move your character, pick a card
 () [bug] collection text keeps rerendering on top of each other making bold text
+() [feat] add in-game instructions for current game stage - roll dice, move your character, pick a card
 () [epic][feat] multiplayer!
     - research...
 () [feat][enhance] keyboard movement: wasd & arrow keys to move on board
@@ -17,6 +15,7 @@ to-do:
     - hand size powerups: assets, spawn, collect, apply
     - discard card powerups: assets, spawn, collect, apply
 () [dev][enhance] direction message for win by 4 elements of a direction
+() [feat] better menu screen graphics
 
 completed:
 (x) implement fight function to compare cards
@@ -37,6 +36,7 @@ completed:
 (x) [epic][feat] board movement(x) [feat] add info text
 (x) [feat] all element fight
 (x) [epic][feat] powerups
+(x) [epic][feat] player customization
 */
 
 import { Elements, Player, Fight, SCREEN_HEIGHT, SCREEN_WIDTH, Powerups } from './Common.js';

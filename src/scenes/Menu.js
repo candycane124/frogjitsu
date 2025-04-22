@@ -26,12 +26,14 @@ export class Menu extends Phaser.Scene
         this.load.image('hat-3','assets/frogs/hats/hat-3.png');
         this.load.image('hat-4','assets/frogs/hats/hat-4.png');
         this.load.image('hat-5','assets/frogs/hats/hat-5.png');
+        this.load.image('hat-6','assets/frogs/hats/hat-6.png');
 
         this.load.image('accessory-0','assets/frogs/accessories/accessory-0.png');
         this.load.image('accessory-1','assets/frogs/accessories/accessory-1.png');
         this.load.image('accessory-2','assets/frogs/accessories/accessory-2.png');
         this.load.image('accessory-3','assets/frogs/accessories/accessory-3.png');
         this.load.image('accessory-4','assets/frogs/accessories/accessory-4.png');
+        this.load.image('accessory-5','assets/frogs/accessories/accessory-5.png');
     }
 
     create()
@@ -42,7 +44,7 @@ export class Menu extends Phaser.Scene
             "accessory": null,
         }
 
-        this.cameras.main.setBackgroundColor('#DDD');
+        this.cameras.main.setBackgroundColor('#878');
 
         this.add.text(SCREEN_WIDTH*1/4, SCREEN_HEIGHT*3/32, 
             "Username:", 
@@ -93,8 +95,8 @@ export class Menu extends Phaser.Scene
         ).setOrigin(0.5);
 
         const colours = ['frog-blue','frog-green','frog-red','frog-yellow'];
-        const hats = ['hat-0','hat-1','hat-2','hat-3','hat-4','hat-5'];
-        const accessories = ['accessory-0','accessory-1','accessory-2','accessory-3','accessory-4'];
+        const hats = ['hat-0','hat-1','hat-2','hat-3','hat-4','hat-5','hat-6'];
+        const accessories = ['accessory-0','accessory-1','accessory-2','accessory-3','accessory-4','accessory-5'];
         let currColour = 0;
         let currHat = 0;
         let currAccessory = 0;
