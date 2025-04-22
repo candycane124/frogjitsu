@@ -155,19 +155,19 @@ export class Menu extends Phaser.Scene
 
     update()
     {
-        // Display mouse coordinates for troubleshooting
-        if (!this.mouseText) {
-            this.mouseText = this.add.text(10, 10, '', {
-                fontSize: '16px',
-                fontFamily: 'Arial',
-                color: '#000000',
-                backgroundColor: '#FFFFFF',
-                padding: { x: 5, y: 2 }
-            }).setDepth(1000); // Ensure it's always on top
-        }
+        // // Display mouse coordinates for troubleshooting
+        // if (!this.mouseText) {
+        //     this.mouseText = this.add.text(10, 10, '', {
+        //         fontSize: '16px',
+        //         fontFamily: 'Arial',
+        //         color: '#000000',
+        //         backgroundColor: '#FFFFFF',
+        //         padding: { x: 5, y: 2 }
+        //     }).setDepth(1000); // Ensure it's always on top
+        // }
 
-        const pointer = this.input.activePointer;
-        this.mouseText.setText(`Mouse: (${pointer.x.toFixed(0)}, ${pointer.y.toFixed(0)})`);
+        // const pointer = this.input.activePointer;
+        // this.mouseText.setText(`Mouse: (${pointer.x.toFixed(0)}, ${pointer.y.toFixed(0)})`);
 
     }
 }

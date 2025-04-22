@@ -3,7 +3,6 @@ FrogJitsu
 Angela Huang
 
 to-do:
-() [feat] exit game
 () [bug] collection text keeps rerendering on top of each other making bold text
 () [feat] add in-game instructions for current game stage - roll dice, move your character, pick a card
 () [epic][feat] multiplayer!
@@ -16,6 +15,7 @@ to-do:
     - discard card powerups: assets, spawn, collect, apply
 () [dev][enhance] direction message for win by 4 elements of a direction
 () [feat] better menu screen graphics
+() [bug] esc pause menu does not pause fight scene or disable input for rolling dice
 
 completed:
 (x) implement fight function to compare cards
@@ -140,13 +140,48 @@ export class Start extends Phaser.Scene
         this.p1.renderCollection(SCREEN_MIDDLE_X,PLAYER_COLLECTION_Y,1);
 
         this.fightInProgress = false;
-        // this.input.on('pointerdown', (pointer) => {
-        //     this.p1.moveCharacter(pointer.x,pointer.y);
-        // });
 
         this.#generateDice();
 
         this.powerup = null;
+
+        this.input.keyboard.on('keydown-ESC', () => {
+            if (!this.pauseMenu) {
+                const blocker = this.add.rectangle(0,0,SCREEN_WIDTH,SCREEN_HEIGHT,0x000000,0.1).setOrigin(0).setDepth(1000).setInteractive();
+                const menuBackground = this.add.rectangle(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.5, 0x000000, 0.8).setOrigin(0.5).setDepth(1001);
+                
+                const continueButton = this.add.text(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 30, "Resume", {
+                    fontSize: '32px',
+                    fontFamily: 'Arial',
+                    color: '#FFFFFF',
+                    backgroundColor: '#00FF00',
+                    padding: { x: 10, y: 5 },
+                    align: 'center'
+                }).setOrigin(0.5).setDepth(1002).setInteractive().on('pointerdown', () => {
+                    this.pauseMenu.destroy(true);
+                    this.pauseMenu = null;
+                });
+                const exitButton = this.add.text(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 30, "Quit", {
+                    fontSize: '32px',
+                    fontFamily: 'Arial',
+                    color: '#FFFFFF',
+                    backgroundColor: '#FF0000',
+                    padding: { x: 10, y: 5 },
+                    align: 'center'
+                }).setOrigin(0.5).setDepth(1002).setInteractive().on('pointerdown', () => {
+                    this.scene.start('Menu', {});
+                });
+
+                this.pauseMenu = this.add.container(0, 0, [blocker, menuBackground, exitButton, continueButton]);
+            }
+        });
+
+        this.events.on('shutdown', () => {
+            if (this.mouseText) {
+                this.mouseText.destroy();
+                this.mouseText = null;
+            }
+        });
     }
 
     #generateDice() {
