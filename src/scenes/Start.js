@@ -3,7 +3,6 @@ FrogJitsu
 Angela Huang
 
 to-do:
-() [bug] collection text keeps rerendering on top of each other making bold text
 () [feat] add in-game instructions for current game stage - roll dice, move your character, pick a card
 () [epic][feat] multiplayer!
     - research...
@@ -37,6 +36,7 @@ completed:
 (x) [feat] all element fight
 (x) [epic][feat] powerups
 (x) [epic][feat] player customization
+(x) [bug] collection text keeps rerendering on top of each other making bold text
 */
 
 import { Elements, Player, Fight, SCREEN_HEIGHT, SCREEN_WIDTH, Powerups } from './Common.js';
@@ -345,6 +345,7 @@ export class Start extends Phaser.Scene
             resultText.destroy();
             if (winner) {
                 winner.collectCard(winner.equipped);
+                this.p1.destroyCollection();
                 this.p1.renderCollection(SCREEN_MIDDLE_X, PLAYER_COLLECTION_Y,1);
             }
 
