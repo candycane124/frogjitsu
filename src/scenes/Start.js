@@ -3,12 +3,8 @@ FrogJitsu
 Angela Huang
 
 to-do:
-() [epic][feat] character customization
-    - create accessories for frogs
-    - customize character on menu screen
-    - username input
-() [bug] collection text keeps rerendering on top of each other making bold text
-() [epic][feat] multiplayer
+() [feat] add in-game instructions for current game stage - roll dice, move your character, pick a card
+() [epic][feat] multiplayer!
     - research...
 () [feat][enhance] keyboard movement: wasd & arrow keys to move on board
 () [epic][feat] powerups 2.0
@@ -17,6 +13,8 @@ to-do:
     - hand size powerups: assets, spawn, collect, apply
     - discard card powerups: assets, spawn, collect, apply
 () [dev][enhance] direction message for win by 4 elements of a direction
+() [feat] better menu screen graphics
+() [bug] esc pause menu does not pause fight scene or disable input for rolling dice
 
 completed:
 (x) implement fight function to compare cards
@@ -37,6 +35,8 @@ completed:
 (x) [epic][feat] board movement(x) [feat] add info text
 (x) [feat] all element fight
 (x) [epic][feat] powerups
+(x) [epic][feat] player customization
+(x) [bug] collection text keeps rerendering on top of each other making bold text
 */
 
 import { Elements, Player, Fight, SCREEN_HEIGHT, SCREEN_WIDTH, Powerups } from './Common.js';
@@ -64,17 +64,21 @@ export class Start extends Phaser.Scene
     }
 
     init(data) {
-        this.selectedFrog = data.selectedFrog || 'frog-blue';
+        this.frog = data.frog
+        this.username = data.username || 'Player';
     }
 
     preload()
     {
+        // LOAD ASSETS
+        //spaces
         this.load.image('space-fire','assets/spaces/space-fire.png');
         this.load.image('space-water','assets/spaces/space-water.png');
         this.load.image('space-earth','assets/spaces/space-earth.png');
         this.load.image('space-air','assets/spaces/space-air.png');
         this.load.image('space-all','assets/spaces/space-all.png');
         this.load.image('space-none','assets/spaces/space-none.png');
+        //cards
         this.load.image('card-fire','assets/cards/card-fire.png');
         this.load.image('card-water','assets/cards/card-water.png');
         this.load.image('card-earth','assets/cards/card-earth.png');
@@ -86,14 +90,17 @@ export class Start extends Phaser.Scene
         for (let i = 0; i < 12; i++) {
             this.load.image('card-'+i.toString(),'assets/cards/card-'+i.toString()+'.png');
         }
+        //dice
         for (let i = 0; i <= 6; i++) {
             this.load.image('dice-'+i.toString(),'assets/die/dice-'+i.toString()+'.png');
         }
+        //info
         this.load.image('info-fire','assets/info/element-info-fire.png');
         this.load.image('info-water','assets/info/element-info-water.png');
         this.load.image('info-earth','assets/info/element-info-earth.png');
         this.load.image('info-air','assets/info/element-info-air.png');
         this.load.image('info-all','assets/info/element-info-all.png');
+        //powerups
         const elements = [Elements.FIRE, Elements.AIR, Elements.WATER, Elements.EARTH];
         for (let e of elements) {
             for (let i in Powerups[e]) {
@@ -118,9 +125,13 @@ export class Start extends Phaser.Scene
 
         this.#generateBoard(spawns);
 
-        this.p1 = new Player("candycane123",this.selectedFrog,this,spawns[randSpawn][0],spawns[randSpawn][1],PLAYER_EQUIP_X,SCREEN_MIDDLE_Y,7);
-        this.p2 = new Player("Computer",'frog-gray',this,spawns[compSpawn][0],spawns[compSpawn][1],COMP_EQUIP_X);
-
+        let computerFrog = {
+            "colour": "frog-gray",
+            "hat": null,
+            "accessory": null,
+        }
+        this.p1 = new Player(this.username,this.frog,this,spawns[randSpawn][0],spawns[randSpawn][1],PLAYER_EQUIP_X,SCREEN_MIDDLE_Y,7);
+        this.p2 = new Player("Computer",computerFrog,this,spawns[compSpawn][0],spawns[compSpawn][1],COMP_EQUIP_X);
 
         console.log(this.p1);
         console.log(this.p2);
@@ -129,13 +140,48 @@ export class Start extends Phaser.Scene
         this.p1.renderCollection(SCREEN_MIDDLE_X,PLAYER_COLLECTION_Y,1);
 
         this.fightInProgress = false;
-        // this.input.on('pointerdown', (pointer) => {
-        //     this.p1.moveCharacter(pointer.x,pointer.y);
-        // });
 
         this.#generateDice();
 
         this.powerup = null;
+
+        this.input.keyboard.on('keydown-ESC', () => {
+            if (!this.pauseMenu) {
+                const blocker = this.add.rectangle(0,0,SCREEN_WIDTH,SCREEN_HEIGHT,0x000000,0.1).setOrigin(0).setDepth(1000).setInteractive();
+                const menuBackground = this.add.rectangle(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.5, 0x000000, 0.8).setOrigin(0.5).setDepth(1001);
+                
+                const continueButton = this.add.text(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 30, "Resume", {
+                    fontSize: '32px',
+                    fontFamily: 'Arial',
+                    color: '#FFFFFF',
+                    backgroundColor: '#00FF00',
+                    padding: { x: 10, y: 5 },
+                    align: 'center'
+                }).setOrigin(0.5).setDepth(1002).setInteractive().on('pointerdown', () => {
+                    this.pauseMenu.destroy(true);
+                    this.pauseMenu = null;
+                });
+                const exitButton = this.add.text(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 30, "Quit", {
+                    fontSize: '32px',
+                    fontFamily: 'Arial',
+                    color: '#FFFFFF',
+                    backgroundColor: '#FF0000',
+                    padding: { x: 10, y: 5 },
+                    align: 'center'
+                }).setOrigin(0.5).setDepth(1002).setInteractive().on('pointerdown', () => {
+                    this.scene.start('Menu', {});
+                });
+
+                this.pauseMenu = this.add.container(0, 0, [blocker, menuBackground, exitButton, continueButton]);
+            }
+        });
+
+        this.events.on('shutdown', () => {
+            if (this.mouseText) {
+                this.mouseText.destroy();
+                this.mouseText = null;
+            }
+        });
     }
 
     #generateDice() {
@@ -299,6 +345,7 @@ export class Start extends Phaser.Scene
             resultText.destroy();
             if (winner) {
                 winner.collectCard(winner.equipped);
+                this.p1.destroyCollection();
                 this.p1.renderCollection(SCREEN_MIDDLE_X, PLAYER_COLLECTION_Y,1);
             }
 
