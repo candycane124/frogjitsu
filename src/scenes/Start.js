@@ -3,13 +3,11 @@ FrogJitsu
 Angela Huang
 
 to-do:
-() [epic][feat] character customization
-    - create accessories for frogs
-    - customize character on menu screen
-    - username input
-() [bug] collection text keeps rerendering on top of each other making bold text
-() [epic][feat] multiplayer
-    - research...
+() [feat] better win screen
+() [epic][feat] multiplayer!
+    - research: node.js, express, socket.io
+    - basic setup
+() [feat] add in-game instructions for current game stage - roll dice, move your character, pick a card
 () [feat][enhance] keyboard movement: wasd & arrow keys to move on board
 () [epic][feat] powerups 2.0
     - add in-fight info for any current powerup that will be applied
@@ -17,6 +15,8 @@ to-do:
     - hand size powerups: assets, spawn, collect, apply
     - discard card powerups: assets, spawn, collect, apply
 () [dev][enhance] direction message for win by 4 elements of a direction
+() [feat] better menu screen graphics
+() [bug] esc pause menu does not pause fight scene or disable input for rolling dice
 
 completed:
 (x) implement fight function to compare cards
