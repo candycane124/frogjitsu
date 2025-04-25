@@ -3,9 +3,11 @@ FrogJitsu
 Angela Huang
 
 to-do:
-() [feat] add in-game instructions for current game stage - roll dice, move your character, pick a card
+() [feat] better win screen
 () [epic][feat] multiplayer!
-    - research...
+    - research: node.js, express, socket.io
+    - basic setup
+() [feat] add in-game instructions for current game stage - roll dice, move your character, pick a card
 () [feat][enhance] keyboard movement: wasd & arrow keys to move on board
 () [epic][feat] powerups 2.0
     - add in-fight info for any current powerup that will be applied
