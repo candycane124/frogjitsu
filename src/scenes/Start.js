@@ -5,8 +5,9 @@ Angela Huang
 to-do:
 () [feat] better win screen
 () [epic][feat] multiplayer!
-    - research: node.js, express, socket.io
     - basic setup
+    - fix user disconnecting
+() [bug] not working on firefox
 () [feat] add in-game instructions for current game stage - roll dice, move your character, pick a card
 () [feat][enhance] keyboard movement: wasd & arrow keys to move on board
 () [epic][feat] powerups 2.0
@@ -171,6 +172,8 @@ export class Start extends Phaser.Scene
                     padding: { x: 10, y: 5 },
                     align: 'center'
                 }).setOrigin(0.5).setDepth(1002).setInteractive().on('pointerdown', () => {
+                    this.pauseMenu.destroy(true);
+                    this.pauseMenu = null;
                     this.scene.start('Menu', {});
                 });
 

@@ -38,6 +38,8 @@ export class Menu extends Phaser.Scene
 
     create()
     {
+        this.#multiplayer();
+
         this.frog = {
             "colour": "frog-blue",
             "hat": null,
@@ -151,6 +153,16 @@ export class Menu extends Phaser.Scene
             sprite.setTexture(cycleList[currIndex]);
             this.frog[property] = cycleList[currIndex];
         });
+    }
+
+    #multiplayer() {
+        this.playerMap = {};
+        Client.setMenu(this);
+        Client.askNewPlayer();
+    }
+
+    addNewPlayer(id) {
+        console.log("adding new player!!!!", id);
     }
 
     update()
