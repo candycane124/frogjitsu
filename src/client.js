@@ -21,3 +21,7 @@ Client.socket.on('allplayers', (players) => {
         Client.menu.addNewPlayer(player.id);
     });
 });
+
+Client.socket.on('remove', (playerId) => {
+    Client.menu.removePlayer(playerId);
+});

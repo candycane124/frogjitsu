@@ -1,4 +1,4 @@
-import { SCREEN_HEIGHT, SCREEN_WIDTH } from './Common.js';
+import { SCREEN_HEIGHT, SCREEN_WIDTH, Player } from './Common.js';
 
 const FROG_SCALE = 0.1875;
 const FROG_SIZE = 1024*FROG_SCALE;
@@ -81,6 +81,7 @@ export class Menu extends Phaser.Scene
             }
         ).setOrigin(0.5).setInteractive().on('pointerdown', () => {
             const username = document.getElementById('username-input').value;
+            console.log("starting game, users online: ", this.players);
             this.scene.start('Start', { frog: this.frog, username: username });
         });
 
@@ -156,13 +157,19 @@ export class Menu extends Phaser.Scene
     }
 
     #multiplayer() {
-        this.playerMap = {};
+        this.players = [];
         Client.setMenu(this);
         Client.askNewPlayer();
     }
 
     addNewPlayer(id) {
-        console.log("adding new player!!!!", id);
+        // console.log("adding new player!!!!", id);
+        this.players.push(id);
+    }
+
+    removePlayer(id) {
+        // console.log("removing player!!!!", id);
+        this.players.splice(this.players.indexOf(id), 1);
     }
 
     update()

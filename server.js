@@ -27,21 +27,27 @@ io.on('connection', (socket) => {
         console.log('A user disconnected');
     });
 
-    socket.on('newplayer', () => {        
+    socket.on('newplayer', () => {      
+        console.log('New player connected with ID:', server.lastPlayerId);  
         socket.player = {
             id: server.lastPlayerId++
         };
         socket.emit('allplayers',getAllPlayers());
         socket.broadcast.emit('newplayer',socket.player);
-        console.log('New player connected with ID:', server.lastPlayerId);
+
+        socket.on('disconnect', () => {
+            console.log('Player disconnected:', socket.player.id);
+            io.emit('remove',socket.player.id);
+        });
     });
 });
 
 function getAllPlayers() {
     let players = [];
-    Object.keys(io.sockets.connected).forEach((socketID) => {
-        var player = io.sockets.connected[socketID].player;
-        if(player) players.push(player);
+    io.sockets.sockets.forEach((socket) => {
+        if (socket.player) {
+            players.push(socket.player);
+        }
     });
     return players;
 }
