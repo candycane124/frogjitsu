@@ -81,8 +81,11 @@ export class Menu extends Phaser.Scene
             }
         ).setOrigin(0.5).setInteractive().on('pointerdown', () => {
             const username = document.getElementById('username-input').value;
+            console.log(this.id);
+            this.players[this.id].username = username;
+            this.players[this.id].frog = this.frog;
             console.log("starting game, users online: ", this.players);
-            this.scene.start('Start', { frog: this.frog, username: username });
+            this.scene.start('Start', { players: this.players, id: this.id });
         });
 
         this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*9/32, 
@@ -157,19 +160,28 @@ export class Menu extends Phaser.Scene
     }
 
     #multiplayer() {
-        this.players = [];
+        this.players = {};
         Client.setMenu(this);
         Client.askNewPlayer();
+        console.log(this.players);
     }
 
     addNewPlayer(id) {
-        // console.log("adding new player!!!!", id);
-        this.players.push(id);
+        console.log("new player joined, adding them to players", id);
+        let newPlayer = {
+            username: "player" + id,
+            frog: {
+                "colour": "frog-blue",
+                "hat": null,
+                "accessory": null,
+            },
+        }
+        this.players[id] = newPlayer;
     }
 
     removePlayer(id) {
-        // console.log("removing player!!!!", id);
-        this.players.splice(this.players.indexOf(id), 1);
+        console.log("player left, removing them from players", id);
+        delete this.players[id];
     }
 
     update()

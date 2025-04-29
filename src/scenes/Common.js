@@ -41,7 +41,8 @@ const CARD_SIZE = 64;
 const GAP = 16;
 
 export class Player {
-    constructor(name, frog, scene, x, y, equipX, equipY = SCREEN_HEIGHT/2, handSize = 7) {
+    constructor(id, name, frog, scene, x, y, equipX, equipY = SCREEN_HEIGHT/2, handSize = 7) {
+        this.id = id;
         this.name = name;
         // this.avatar = avatar;
         this.scene = scene;

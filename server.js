@@ -22,17 +22,12 @@ server.lastPlayerId = 0;
 
 // Example socket.io event handling
 io.on('connection', (socket) => {
-    console.log('A user connected');
-    socket.on('disconnect', () => {
-        console.log('A user disconnected');
-    });
-
     socket.on('newplayer', () => {      
         console.log('New player connected with ID:', server.lastPlayerId);  
         socket.player = {
             id: server.lastPlayerId++
         };
-        socket.emit('allplayers',getAllPlayers());
+        socket.emit('allplayers',getAllPlayers(socket.player));
         socket.broadcast.emit('newplayer',socket.player);
 
         socket.on('disconnect', () => {
@@ -42,12 +37,12 @@ io.on('connection', (socket) => {
     });
 });
 
-function getAllPlayers() {
+function getAllPlayers(currPlayer) {
     let players = [];
     io.sockets.sockets.forEach((socket) => {
         if (socket.player) {
             players.push(socket.player);
         }
     });
-    return players;
+    return [players,currPlayer.id];
 }

@@ -3,10 +3,11 @@ FrogJitsu
 Angela Huang
 
 to-do:
-() [feat] better win screen
 () [epic][feat] multiplayer!
-    - basic setup
-    - fix user disconnecting
+    - lobby: start when both players ready
+    - sync games: movement, turns
+    - esc menu leave game functionality
+() [feat] better win screen
 () [bug] not working on firefox
 () [feat] add in-game instructions for current game stage - roll dice, move your character, pick a card
 () [feat][enhance] keyboard movement: wasd & arrow keys to move on board
@@ -67,8 +68,10 @@ export class Start extends Phaser.Scene
     }
 
     init(data) {
-        this.frog = data.frog
-        this.username = data.username || 'Player';
+        // this.frog = data.frog
+        // this.username = data.username || 'Player';
+        this.players = data.players;
+        this.id = data.id;
     }
 
     preload()
@@ -122,19 +125,28 @@ export class Start extends Phaser.Scene
             [SCREEN_MIDDLE_X,SCREEN_MIDDLE_Y+2*SPACE_SIZE],
             [SCREEN_MIDDLE_X-2*SPACE_SIZE,SCREEN_MIDDLE_Y]
         ]
-        let randSpawn = Math.floor(Math.random()*4);
-        let compSpawn = (randSpawn+2)%4;
-        console.log("p1 spawn: ", randSpawn, "p2 spawn: ", compSpawn);
+        let spawn1 = Math.floor(Math.random()*4);
+        let spawn2 = (spawn1+2)%4;
+        console.log("p1 spawn: ", spawn1, "p2 spawn: ", spawn2);
 
         this.#generateBoard(spawns);
 
-        let computerFrog = {
-            "colour": "frog-gray",
-            "hat": null,
-            "accessory": null,
+        // let computerFrog = {
+        //     "colour": "frog-gray",
+        //     "hat": null,
+        //     "accessory": null,
+        // }
+        // this.p1 = new Player(this.username,this.frog,this,spawns[randSpawn][0],spawns[randSpawn][1],PLAYER_EQUIP_X,SCREEN_MIDDLE_Y,7);
+        // this.p2 = new Player("Computer",computerFrog,this,spawns[compSpawn][0],spawns[compSpawn][1],COMP_EQUIP_X);
+        for (let i in this.players) {
+            if (i == this.id) {
+                this.p1 = new Player(i, this.players[i].username, this.players[i].frog, this, spawns[spawn1][0], spawns[spawn1][1], PLAYER_EQUIP_X, SCREEN_MIDDLE_Y, 7);
+            } else {
+                this.p2 = new Player(i, this.players[i].username, this.players[i].frog, this, spawns[spawn2][0], spawns[spawn2][1], COMP_EQUIP_X);
+            }
         }
-        this.p1 = new Player(this.username,this.frog,this,spawns[randSpawn][0],spawns[randSpawn][1],PLAYER_EQUIP_X,SCREEN_MIDDLE_Y,7);
-        this.p2 = new Player("Computer",computerFrog,this,spawns[compSpawn][0],spawns[compSpawn][1],COMP_EQUIP_X);
+        this.turn = this.p1.id;
+        console.log(this.turn);
 
         console.log(this.p1);
         console.log(this.p2);
@@ -193,11 +205,16 @@ export class Start extends Phaser.Scene
         let roll = this.add.image(PLAYER_EQUIP_X,SCREEN_MIDDLE_Y,'dice-0').setScale(SPACE_SCALE/1.5).setInteractive();
 
         const rollDice = () => {
-            let rolled = Math.floor(Math.random()*4)+1;
-            console.log("rolled: ", rolled);
-            this.dice = this.add.image(PLAYER_EQUIP_X,SCREEN_MIDDLE_Y,'dice-'+rolled.toString()).setScale(SPACE_SCALE/1.5);
-            this.p1.setMoves(rolled);
-            roll.destroy();
+            if (this.turn == this.p1.id) {
+                let rolled = Math.floor(Math.random()*4)+1;
+                console.log("rolled: ", rolled);
+                this.dice = this.add.image(PLAYER_EQUIP_X,SCREEN_MIDDLE_Y,'dice-'+rolled.toString()).setScale(SPACE_SCALE/1.5);
+                this.p1.setMoves(rolled);
+                roll.destroy();
+                this.turn = this.p2.id;
+            } else {
+                console.log("not your turn to roll");
+            }
         };
 
         roll.on('pointerdown', rollDice);

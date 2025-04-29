@@ -15,11 +15,12 @@ Client.socket.on('newplayer', (player) => {
     Client.menu.addNewPlayer(player.id);
 });
 
-Client.socket.on('allplayers', (players) => {
-    console.log(players);
-    players.forEach(player => {
+Client.socket.on('allplayers', (p) => {
+    console.log(p);
+    p[0].forEach(player => {
         Client.menu.addNewPlayer(player.id);
     });
+    Client.menu.id = p[1];
 });
 
 Client.socket.on('remove', (playerId) => {
