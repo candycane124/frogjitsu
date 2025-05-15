@@ -19,6 +19,7 @@ server.listen(3000, () => {
 });
 
 server.lastPlayerId = 0;
+server.players = {};
 
 // Example socket.io event handling
 io.on('connection', (socket) => {
@@ -27,8 +28,24 @@ io.on('connection', (socket) => {
         socket.player = {
             id: server.lastPlayerId++
         };
+        server.players[socket.player.id] = { ready: false, socket: socket };
         socket.emit('allplayers',getAllPlayers(socket.player));
         socket.broadcast.emit('newplayer',socket.player);
+
+        socket.on('ready', (playerData) => {
+            // Mark this player as ready and store their data
+            server.players[socket.player.id].ready = true;
+            server.players[socket.player.id].data = playerData;
+            // Check if two players are ready
+            const readyPlayers = Object.values(server.players).filter(p => p.ready);
+            if (readyPlayers.length === 2) {
+                // Send both players' data to all clients
+                const allPlayerData = Object.values(server.players).map(p => p.data);
+                io.emit('startgame', allPlayerData);
+                // Reset readiness for next game if needed
+                Object.values(server.players).forEach(p => p.ready = false);
+            }
+        });
 
         socket.on('disconnect', () => {
             console.log('Player disconnected:', socket.player.id);

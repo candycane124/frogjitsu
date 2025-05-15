@@ -4,9 +4,12 @@ Angela Huang
 
 to-do:
 () [epic][feat] multiplayer!
-    - lobby: start when both players ready
-    - sync games: movement, turns
+    - sync games: turns, movement
+    - sync games: fights, powerups, wins
     - esc menu leave game functionality
+    - [fix] disable username input box when readied
+    - [fix] multiple players/games
+    - [fix] fix player should disconnect when viewing rules
 () [feat] better win screen
 () [bug] not working on firefox
 () [feat] add in-game instructions for current game stage - roll dice, move your character, pick a card

@@ -69,7 +69,7 @@ export class Menu extends Phaser.Scene
             ">
         `);
 
-        this.add.text(SCREEN_WIDTH*3/4, SCREEN_HEIGHT*6/32, 
+        this.playButton = this.add.text(SCREEN_WIDTH*3/4, SCREEN_HEIGHT*6/32, 
             "PLAY >", 
             {
             fontSize: '32px',
@@ -82,9 +82,43 @@ export class Menu extends Phaser.Scene
         ).setOrigin(0.5).setInteractive().on('pointerdown', () => {
             const username = document.getElementById('username-input').value;
             console.log(this.id);
-            this.players[this.id].username = username;
-            this.players[this.id].frog = this.frog;
-            console.log("starting game, users online: ", this.players);
+            if (username.length >= 1) {
+                this.players[this.id].username = username;
+            }
+            Client.socket.emit('ready', {
+                id: this.id,
+                username: this.players[this.id].username,
+                frog: this.frog
+            });
+            // this.players[this.id].frog = this.frog;
+            // console.log("starting game, users online: ", this.players);
+            // this.scene.start('Start', { players: this.players, id: this.id });
+
+            // Disable all interactive elements
+            this.playButton.disableInteractive();
+            this.instrButton.disableInteractive();
+            this.carouselArrows.forEach(arrow => arrow.disableInteractive());
+            inputBox.node.disabled = true; // disables the username input
+
+            // Optionally, show a waiting message
+            if (!this.waitingText) {
+                this.waitingText = this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*15/32, "Waiting for another player...", {
+                    fontSize: '28px',
+                    fontFamily: 'Arial',
+                    color: '#000000',
+                    backgroundColor: '#FFFFFF',
+                    padding: { x: 10, y: 5 },
+                    align: 'center'
+                }).setOrigin(0.5);
+            }
+        });
+
+        Client.socket.on('startgame', (allPlayerData) => {
+            console.log("starting game, users readied: ", allPlayerData);
+            allPlayerData.forEach(player => {
+                this.players[player.id].username = player.username;
+                this.players[player.id].frog = player.frog;
+            });
             this.scene.start('Start', { players: this.players, id: this.id });
         });
 
@@ -111,11 +145,12 @@ export class Menu extends Phaser.Scene
         let hatSprite = this.add.image(SCREEN_WIDTH/2, SCREEN_HEIGHT*14/32, hats[currHat]).setScale(FROG_SCALE);
         let accessorySprite = this.add.image(SCREEN_WIDTH/2, SCREEN_HEIGHT*18/32, accessories[currAccessory]).setScale(FROG_SCALE);
 
+        this.carouselArrows = [];
         this.#carouselArrows(frogSprite, colours, currColour, "colour", SCREEN_HEIGHT*18/32);
         this.#carouselArrows(hatSprite, hats, currHat, "hat", SCREEN_HEIGHT*14/32);
         this.#carouselArrows(accessorySprite, accessories, currAccessory, "accessory", SCREEN_HEIGHT*22/32);
 
-        this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*27/32, 
+        this.instrButton = this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*27/32, 
             "How to play?", 
             {
             fontSize: '32px',
@@ -131,7 +166,7 @@ export class Menu extends Phaser.Scene
     }
 
     #carouselArrows(sprite, cycleList, currIndex, property, y) {
-        this.add.text(SCREEN_WIDTH*1/4, y, "<", {
+        const leftArrow = this.add.text(SCREEN_WIDTH*1/4, y, "<", {
             fontSize: '48px',
             fontFamily: 'Arial',
             color: '#000000',
@@ -145,7 +180,7 @@ export class Menu extends Phaser.Scene
         });
     
         // Add right navigation button
-        this.add.text(SCREEN_WIDTH*3/4, y, ">", {
+        const rightArrow = this.add.text(SCREEN_WIDTH*3/4, y, ">", {
             fontSize: '48px',
             fontFamily: 'Arial',
             color: '#000000',
@@ -157,6 +192,9 @@ export class Menu extends Phaser.Scene
             sprite.setTexture(cycleList[currIndex]);
             this.frog[property] = cycleList[currIndex];
         });
+
+        this.carouselArrows.push(leftArrow);
+        this.carouselArrows.push(rightArrow);
     }
 
     #multiplayer() {
