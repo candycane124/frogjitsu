@@ -4,14 +4,13 @@ Angela Huang
 
 to-do:
 () [epic][feat] multiplayer!
-    - sync games: turns, movement
-    - sync games: fights, powerups, wins
+    - sync games: spawn, turns, powerups
+    - sync games: movement
+    - sync games: fights
     - esc menu leave game functionality
     - [fix] disable username input box when readied
-    - [fix] multiple players/games
     - [fix] fix player should disconnect when viewing rules
 () [feat] better win screen
-() [bug] not working on firefox
 () [feat] add in-game instructions for current game stage - roll dice, move your character, pick a card
 () [feat][enhance] keyboard movement: wasd & arrow keys to move on board
 () [epic][feat] powerups 2.0
@@ -141,6 +140,7 @@ export class Start extends Phaser.Scene
         // }
         // this.p1 = new Player(this.username,this.frog,this,spawns[randSpawn][0],spawns[randSpawn][1],PLAYER_EQUIP_X,SCREEN_MIDDLE_Y,7);
         // this.p2 = new Player("Computer",computerFrog,this,spawns[compSpawn][0],spawns[compSpawn][1],COMP_EQUIP_X);
+        console.log(this.players, this.id);
         for (let i in this.players) {
             if (i == this.id) {
                 this.p1 = new Player(i, this.players[i].username, this.players[i].frog, this, spawns[spawn1][0], spawns[spawn1][1], PLAYER_EQUIP_X, SCREEN_MIDDLE_Y, 7);

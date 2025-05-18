@@ -28,7 +28,7 @@ io.on('connection', (socket) => {
         socket.player = {
             id: server.lastPlayerId++
         };
-        server.players[socket.player.id] = { ready: false, socket: socket };
+        server.players[socket.player.id] = { ready: false, socket: socket, ingame: false };
         socket.emit('allplayers',getAllPlayers(socket.player));
         socket.broadcast.emit('newplayer',socket.player);
 
@@ -39,11 +39,14 @@ io.on('connection', (socket) => {
             // Check if two players are ready
             const readyPlayers = Object.values(server.players).filter(p => p.ready);
             if (readyPlayers.length === 2) {
+                readyPlayers[0].ingame = true;
+                readyPlayers[1].ingame = true;
                 // Send both players' data to all clients
-                const allPlayerData = Object.values(server.players).map(p => p.data);
+                const allPlayerData = readyPlayers.map(p => p.data);
                 io.emit('startgame', allPlayerData);
                 // Reset readiness for next game if needed
                 Object.values(server.players).forEach(p => p.ready = false);
+                // console.log('Both players are ready, starting game', server.players);
             }
         });
 
