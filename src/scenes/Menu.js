@@ -113,18 +113,6 @@ export class Menu extends Phaser.Scene
             }
         });
 
-        Client.socket.on('startgame', (allPlayerData) => {
-            console.log("starting game, for users readied: ", allPlayerData);
-            if (allPlayerData.some(player => player.id === this.id)) {
-                allPlayerData.forEach(player => {
-                    this.players[player.id].username = player.username;
-                    this.players[player.id].frog = player.frog;
-                    this.players[player.id].spawn = player.spawn;
-                });
-                this.scene.start('Start', { players: this.players, id: this.id });
-            }
-        });
-
         this.add.text(SCREEN_WIDTH/2, SCREEN_HEIGHT*9/32, 
             "Customize your frog:", 
             {
@@ -165,6 +153,18 @@ export class Menu extends Phaser.Scene
             }
         ).setOrigin(0.5).setInteractive().on('pointerdown', () => {
             this.scene.start('Instructions');
+        });
+
+        Client.socket.on('startgame', (allPlayerData) => {
+            console.log("starting game, for users readied: ", allPlayerData);
+            if (allPlayerData.some(player => player.id === this.id)) {
+                allPlayerData.forEach(player => {
+                    this.players[player.id].username = player.username;
+                    this.players[player.id].frog = player.frog;
+                    this.players[player.id].spawn = player.spawn;
+                });
+                this.scene.start('Start', { players: this.players, id: this.id, turn: allPlayerData[0].turn });
+            }
         });
     }
 

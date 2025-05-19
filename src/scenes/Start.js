@@ -4,11 +4,12 @@ Angela Huang
 
 to-do:
 () [epic][feat] multiplayer!
-    - sync games: movement, turns, powerups, fights
+    - sync games: board, fights, powerups
     - esc menu leave game functionality
     - [fix] disable username input box when readied
     - [fix] fix player should disconnect when viewing rules
 () [feat] better win screen
+() add indicator for who's turn it is & which player you are
 () [feat] add in-game instructions for current game stage - roll dice, move your character, pick a card
 () [feat][enhance] keyboard movement: wasd & arrow keys to move on board
 () [epic][feat] powerups 2.0
@@ -50,6 +51,7 @@ export class Start extends Phaser.Scene
         // this.username = data.username || 'Player';
         this.players = data.players;
         this.id = data.id;
+        this.turn = data.turn;
     }
 
     preload()
@@ -124,8 +126,8 @@ export class Start extends Phaser.Scene
                 this.p2 = new Player(i, this.players[i].username, this.players[i].frog, this, this.players[i].spawn[0], this.players[i].spawn[1], COMP_EQUIP_X);
             }
         }
-        this.turn = this.p1.id;
-        console.log(this.turn);
+        // this.turn = this.p1.id;
+        // console.log(this.turn);
 
         console.log(this.p1);
         console.log(this.p2);
@@ -178,6 +180,11 @@ export class Start extends Phaser.Scene
                 this.mouseText = null;
             }
         });
+
+        Client.socket.on('update', (playerData) => {
+            console.log('Player update: ', playerData);
+            this.p2.moveCharacter(playerData.data.x, playerData.data.y);
+        });
     }
 
     #generateDice() {
@@ -228,6 +235,12 @@ export class Start extends Phaser.Scene
                 this.powerup.destroy();
                 this.powerup = null;
             }
+
+            console.log('emitting update');
+            Client.socket.emit('update', {id: this.p1.id, data: {
+                x: x,
+                y: y,
+            }, otherId: this.p2.id});
 
             if (movesLeft == 0) {
                 this.#startFightScene();

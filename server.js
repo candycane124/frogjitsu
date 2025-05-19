@@ -44,7 +44,9 @@ io.on('connection', (socket) => {
             // Check if two players are ready
             const readyPlayers = Object.values(server.players).filter(p => p.ready);
             if (readyPlayers.length === 2) {
+                const allPlayerData = readyPlayers.map(p => p.data);
 
+                //generate random spawn points
                 let spawns = [
                     [SCREEN_MIDDLE_X,SCREEN_MIDDLE_Y-2*SPACE_SIZE],
                     [SCREEN_MIDDLE_X+2*SPACE_SIZE,SCREEN_MIDDLE_Y],
@@ -54,19 +56,27 @@ io.on('connection', (socket) => {
                 let spawn1 = Math.floor(Math.random()*4);
                 let spawn2 = (spawn1+2)%4;
                 console.log("p1 spawn: ", spawn1, "p2 spawn: ", spawn2);
-
-                // Send both players' data to all clients
-                const allPlayerData = readyPlayers.map(p => p.data);
-
                 allPlayerData[0].spawn = spawns[spawn1];
                 allPlayerData[1].spawn = spawns[spawn2];
-                // console.log('ready & starting game', server.players, allPlayerData);
 
+                // pick random player to start
+                let turn = allPlayerData[Math.floor(Math.random()*2)].id;
+                allPlayerData[0].turn = turn;
+                allPlayerData[1].turn = turn;
+                console.log(turn, "goes first");
+
+                // console.log('ready & starting game', server.players, allPlayerData);
                 io.emit('startgame', allPlayerData);
 
                 // Reset readiness for next game if needed
                 Object.values(server.players).forEach(p => p.ready = false);
             }
+        });
+
+        socket.on('update', (playerData) => {
+            // console.log('Player update: ', server.players[playerData.otherId], playerData);
+            server.players[playerData.otherId].socket.emit('update', playerData);
+            // socket.broadcast.emit('update', playerData);
         });
 
         socket.on('disconnect', () => {
