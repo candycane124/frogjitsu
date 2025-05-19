@@ -119,6 +119,7 @@ export class Menu extends Phaser.Scene
                 allPlayerData.forEach(player => {
                     this.players[player.id].username = player.username;
                     this.players[player.id].frog = player.frog;
+                    this.players[player.id].spawn = player.spawn;
                 });
                 this.scene.start('Start', { players: this.players, id: this.id });
             }

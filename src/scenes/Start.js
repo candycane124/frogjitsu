@@ -4,9 +4,7 @@ Angela Huang
 
 to-do:
 () [epic][feat] multiplayer!
-    - sync games: spawn, turns, powerups
-    - sync games: movement
-    - sync games: fights
+    - sync games: movement, turns, powerups, fights
     - esc menu leave game functionality
     - [fix] disable username input box when readied
     - [fix] fix player should disconnect when viewing rules
@@ -21,28 +19,6 @@ to-do:
 () [dev][enhance] direction message for win by 4 elements of a direction
 () [feat] better menu screen graphics
 () [bug] esc pause menu does not pause fight scene or disable input for rolling dice
-
-completed:
-(x) implement fight function to compare cards
-(x) have computer pick random card after you equip, add time delay
-(x) figure out best way to render cards & get assets
-(x) disable clicking of opponents cards
-(x) add text/in-game feedback for win
-(x) reorganize code + separate board & fight
-(x) FE collection
-(x) BE collect card
-(x) create frog/avatar assets & add to game with spawn
-(x) [bug] unrender computer collection when not fighting
-(x) [feat] add win condition
-(x) [bug] tie rematch does not work
-(x) [dev] add to github & move to vscode
-(x) [enhance] update card directions to be black
-(x) [feat][art] all element tile
-(x) [epic][feat] board movement(x) [feat] add info text
-(x) [feat] all element fight
-(x) [epic][feat] powerups
-(x) [epic][feat] player customization
-(x) [bug] collection text keeps rerendering on top of each other making bold text
 */
 
 import { Elements, Player, Fight, SCREEN_HEIGHT, SCREEN_WIDTH, Powerups } from './Common.js';
@@ -127,9 +103,9 @@ export class Start extends Phaser.Scene
             [SCREEN_MIDDLE_X,SCREEN_MIDDLE_Y+2*SPACE_SIZE],
             [SCREEN_MIDDLE_X-2*SPACE_SIZE,SCREEN_MIDDLE_Y]
         ]
-        let spawn1 = Math.floor(Math.random()*4);
-        let spawn2 = (spawn1+2)%4;
-        console.log("p1 spawn: ", spawn1, "p2 spawn: ", spawn2);
+        // let spawn1 = Math.floor(Math.random()*4);
+        // let spawn2 = (spawn1+2)%4;
+        // console.log("p1 spawn: ", spawn1, "p2 spawn: ", spawn2);
 
         this.#generateBoard(spawns);
 
@@ -143,9 +119,9 @@ export class Start extends Phaser.Scene
         console.log(this.players, this.id);
         for (let i in this.players) {
             if (i == this.id) {
-                this.p1 = new Player(i, this.players[i].username, this.players[i].frog, this, spawns[spawn1][0], spawns[spawn1][1], PLAYER_EQUIP_X, SCREEN_MIDDLE_Y, 7);
+                this.p1 = new Player(i, this.players[i].username, this.players[i].frog, this, this.players[i].spawn[0], this.players[i].spawn[1], PLAYER_EQUIP_X, SCREEN_MIDDLE_Y, 7);
             } else {
-                this.p2 = new Player(i, this.players[i].username, this.players[i].frog, this, spawns[spawn2][0], spawns[spawn2][1], COMP_EQUIP_X);
+                this.p2 = new Player(i, this.players[i].username, this.players[i].frog, this, this.players[i].spawn[0], this.players[i].spawn[1], COMP_EQUIP_X);
             }
         }
         this.turn = this.p1.id;

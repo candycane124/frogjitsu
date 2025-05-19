@@ -1,3 +1,9 @@
+const SCREEN_WIDTH = 1024;
+const SCREEN_HEIGHT = 768;
+const SCREEN_MIDDLE_X = SCREEN_WIDTH/2;
+const SCREEN_MIDDLE_Y = SCREEN_HEIGHT/2;
+const SPACE_SIZE = 64;
+
 var express = require('express');
 var app = express();
 var server = require('http').Server(app);
@@ -21,14 +27,13 @@ server.listen(3000, () => {
 server.lastPlayerId = 0;
 server.players = {};
 
-// Example socket.io event handling
 io.on('connection', (socket) => {
     socket.on('newplayer', () => {      
         console.log('New player connected with ID:', server.lastPlayerId);  
         socket.player = {
             id: server.lastPlayerId++
         };
-        server.players[socket.player.id] = { ready: false, socket: socket, ingame: false };
+        server.players[socket.player.id] = { ready: false, socket: socket };
         socket.emit('allplayers',getAllPlayers(socket.player));
         socket.broadcast.emit('newplayer',socket.player);
 
@@ -39,14 +44,28 @@ io.on('connection', (socket) => {
             // Check if two players are ready
             const readyPlayers = Object.values(server.players).filter(p => p.ready);
             if (readyPlayers.length === 2) {
-                readyPlayers[0].ingame = true;
-                readyPlayers[1].ingame = true;
+
+                let spawns = [
+                    [SCREEN_MIDDLE_X,SCREEN_MIDDLE_Y-2*SPACE_SIZE],
+                    [SCREEN_MIDDLE_X+2*SPACE_SIZE,SCREEN_MIDDLE_Y],
+                    [SCREEN_MIDDLE_X,SCREEN_MIDDLE_Y+2*SPACE_SIZE],
+                    [SCREEN_MIDDLE_X-2*SPACE_SIZE,SCREEN_MIDDLE_Y]
+                ]
+                let spawn1 = Math.floor(Math.random()*4);
+                let spawn2 = (spawn1+2)%4;
+                console.log("p1 spawn: ", spawn1, "p2 spawn: ", spawn2);
+
                 // Send both players' data to all clients
                 const allPlayerData = readyPlayers.map(p => p.data);
+
+                allPlayerData[0].spawn = spawns[spawn1];
+                allPlayerData[1].spawn = spawns[spawn2];
+                // console.log('ready & starting game', server.players, allPlayerData);
+
                 io.emit('startgame', allPlayerData);
+
                 // Reset readiness for next game if needed
                 Object.values(server.players).forEach(p => p.ready = false);
-                // console.log('Both players are ready, starting game', server.players);
             }
         });
 
