@@ -155,15 +155,18 @@ export class Menu extends Phaser.Scene
             this.scene.start('Instructions');
         });
 
-        Client.socket.on('startgame', (allPlayerData) => {
-            console.log("starting game, for users readied: ", allPlayerData);
-            if (allPlayerData.some(player => player.id === this.id)) {
-                allPlayerData.forEach(player => {
+        Client.socket.on('startgame', (data) => {
+            console.log("starting game: ", data);
+            if (data.allPlayerData.some(player => player.id === this.id)) {
+                data.allPlayerData.forEach(player => {
                     this.players[player.id].username = player.username;
                     this.players[player.id].frog = player.frog;
                     this.players[player.id].spawn = player.spawn;
                 });
-                this.scene.start('Start', { players: this.players, id: this.id, turn: allPlayerData[0].turn });
+                this.scene.start('Start', { 
+                    players: this.players, id: this.id, 
+                    turn: data.gameData.turn, spaces: data.gameData.spaces 
+                });
             }
         });
     }

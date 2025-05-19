@@ -4,7 +4,7 @@ Angela Huang
 
 to-do:
 () [epic][feat] multiplayer!
-    - sync games: board, fights, powerups
+    - sync games: fights, turns, powerups
     - esc menu leave game functionality
     - [fix] disable username input box when readied
     - [fix] fix player should disconnect when viewing rules
@@ -52,6 +52,7 @@ export class Start extends Phaser.Scene
         this.players = data.players;
         this.id = data.id;
         this.turn = data.turn;
+        this.spaces = data.spaces;
     }
 
     preload()
@@ -251,24 +252,24 @@ export class Start extends Phaser.Scene
     #generateBoard(spawns) {
         this.cameras.main.setBackgroundColor('#DDD');
 
-        //generate map
-        const elements = [Elements.FIRE, Elements.AIR, Elements.WATER, Elements.EARTH];
-        let spaces = [...elements, ...elements];
-        // shuffle with Fisher-Yates algorithm
-        for (let i = spaces.length - 1; i > 0; i--) {
-            let j = Math.floor(Math.random() * (i + 1));
-            [spaces[i], spaces[j]] = [spaces[j], spaces[i]]; // Swap elements
-        }
-        spaces.splice(4, 0, Elements.ALL);
+        // //generate map
+        // const elements = [Elements.FIRE, Elements.AIR, Elements.WATER, Elements.EARTH];
+        // let spaces = [...elements, ...elements];
+        // // shuffle with Fisher-Yates algorithm
+        // for (let i = spaces.length - 1; i > 0; i--) {
+        //     let j = Math.floor(Math.random() * (i + 1));
+        //     [spaces[i], spaces[j]] = [spaces[j], spaces[i]]; // Swap elements
+        // }
+        // spaces.splice(4, 0, Elements.ALL);
 
-        this.mapList = spaces;
-        console.log(spaces)
+        // this.mapList = this.spaces;
+        // console.log(spaces)
 
         let anchorX = SCREEN_MIDDLE_X-SPACE_SIZE;
         let anchorY = SCREEN_MIDDLE_Y-SPACE_SIZE;
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
-                let currentElement = spaces[i*3+j];
+                let currentElement = this.spaces[i*3+j];
                 let space = this.add.image(anchorX+SPACE_SIZE*j,anchorY+SPACE_SIZE*i,'space-'+currentElement).setScale(SPACE_SCALE);
                 space.setInteractive().setData({
                     "id": i*3+j,
@@ -307,8 +308,8 @@ export class Start extends Phaser.Scene
         }
         let x = randSpace%3*SPACE_SIZE+SCREEN_MIDDLE_X-SPACE_SIZE;
         let y = Math.floor(randSpace/3)*SPACE_SIZE+SCREEN_MIDDLE_Y-SPACE_SIZE;
-        console.log(`powerup type ${randPowerup} at (${x},${y}) on element ${this.mapList[randSpace]}`);
-        this.powerup = this.add.image(x,y,'powerup-'+Powerups[this.mapList[randSpace]][randPowerup]['name']).setScale(SPACE_SCALE/2);
+        console.log(`powerup type ${randPowerup} at (${x},${y}) on element ${this.spaces[randSpace]}`);
+        this.powerup = this.add.image(x,y,'powerup-'+Powerups[this.spaces[randSpace]][randPowerup]['name']).setScale(SPACE_SCALE/2);
     }
 
     #startFightScene() {

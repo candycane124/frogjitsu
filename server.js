@@ -3,6 +3,14 @@ const SCREEN_HEIGHT = 768;
 const SCREEN_MIDDLE_X = SCREEN_WIDTH/2;
 const SCREEN_MIDDLE_Y = SCREEN_HEIGHT/2;
 const SPACE_SIZE = 64;
+const Elements = {
+    FIRE: 'fire',
+    AIR: 'air',
+    WATER: 'water',
+    EARTH: 'earth',
+    ALL: 'all',
+    NONE: 'none'
+};
 
 var express = require('express');
 var app = express();
@@ -45,6 +53,7 @@ io.on('connection', (socket) => {
             const readyPlayers = Object.values(server.players).filter(p => p.ready);
             if (readyPlayers.length === 2) {
                 const allPlayerData = readyPlayers.map(p => p.data);
+                let gameData = {};
 
                 //generate random spawn points
                 let spawns = [
@@ -59,14 +68,25 @@ io.on('connection', (socket) => {
                 allPlayerData[0].spawn = spawns[spawn1];
                 allPlayerData[1].spawn = spawns[spawn2];
 
+                // randomly generate map
+                const elements = [Elements.FIRE, Elements.AIR, Elements.WATER, Elements.EARTH];
+                let spaces = [...elements, ...elements];
+                // shuffle with Fisher-Yates algorithm
+                for (let i = spaces.length - 1; i > 0; i--) {
+                    let j = Math.floor(Math.random() * (i + 1));
+                    [spaces[i], spaces[j]] = [spaces[j], spaces[i]];
+                }
+                spaces.splice(4, 0, Elements.ALL);
+                gameData.spaces = spaces;
+                console.log(spaces);
+
                 // pick random player to start
                 let turn = allPlayerData[Math.floor(Math.random()*2)].id;
-                allPlayerData[0].turn = turn;
-                allPlayerData[1].turn = turn;
+                gameData.turn = turn;
                 console.log(turn, "goes first");
 
                 // console.log('ready & starting game', server.players, allPlayerData);
-                io.emit('startgame', allPlayerData);
+                io.emit('startgame', {allPlayerData: allPlayerData, gameData: gameData});
 
                 // Reset readiness for next game if needed
                 Object.values(server.players).forEach(p => p.ready = false);
