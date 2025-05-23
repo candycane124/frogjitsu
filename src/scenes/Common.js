@@ -49,9 +49,9 @@ export class Player {
         this.deck = this.#createStartingDeck(scene);
         this.handSize = handSize;
         this.hand = [];
-        for (let i = 0; i < this.handSize; i++) {
-            this.drawCard();
-        }
+        // for (let i = 0; i < this.handSize; i++) {
+        //     this.drawCard();
+        // }
         this.collection = [
             { [Elements.FIRE]: 0, [Elements.AIR]: 0, [Elements.WATER]: 0, [Elements.EARTH]: 0 },
             { [Elements.FIRE]: 0, [Elements.AIR]: 0, [Elements.WATER]: 0, [Elements.EARTH]: 0 },
@@ -141,13 +141,17 @@ export class Player {
         return deck;
     }
 
-    drawCard() {
-        if (this.deck.length > 0 && this.hand.length < this.handSize) {
-            // console.log(this.name + " is drawing card...");
-            const randomIndex = Math.floor(Math.random() * this.deck.length);
-            const drawnCard = this.deck.splice(randomIndex, 1)[0];
-            this.hand.push(drawnCard);
-        }
+    drawCard(index) {
+        // if (this.deck.length > 0 && this.hand.length < this.handSize) {
+        //     // console.log(this.name + " is drawing card...");
+        //     const randomIndex = Math.floor(Math.random() * this.deck.length);
+        //     const drawnCard = this.deck.splice(randomIndex, 1)[0];
+        //     this.hand.push(drawnCard);
+        // }
+        console.log("getting card index",index,this.name);
+        const drawnCard = this.deck.splice(index%this.deck.length, 1)[0];
+        console.log("drew:", drawnCard.getData("value"), drawnCard.getData("element"), drawnCard.getData("direction"));
+        this.hand.push(drawnCard);
     }
 
     equipCard(card) {
@@ -156,9 +160,44 @@ export class Player {
             card.setPosition(this.equipX,this.equipY);
             this.equipped = card;
             this.hand.splice(i,1);
-            this.drawCard();
+            
+            Client.socket.emit('draw', {
+                id: this.id,
+                otherId: this.scene.p2.id,
+                data: {
+                    deckLength: this.deck.length,
+                    handLength: this.hand.length,
+                    handSize: this.handSize,
+                }
+            });
+
+            Client.socket.emit('equip', {
+                id: this.id,
+                otherId: this.scene.p2.id,
+                data: {
+                    card: {
+                        value: card.getData("value"),
+                        element: card.getData("element"),
+                        direction: card.getData("direction")
+                    }
+                }
+            });
+
         } else {
             console.error("Cannot equip card that is not in hand.")
+        }
+    }
+
+    equipCardResponse(cardData) {
+        let card = this.hand.find(c =>
+            c.getData("value") === cardData.value &&
+            c.getData("element") === cardData.element &&
+            c.getData("direction") === cardData.direction
+        );
+        if (card) {
+            card.setPosition(this.equipX,this.equipY);
+            this.equipped = card;
+            this.hand.splice(this.hand.indexOf(card),1);
         }
     }
 
@@ -173,7 +212,8 @@ export class Player {
 
         const totalWidth = this.handSize * CARD_SIZE + (this.handSize - 1) * GAP;
         const startX = x - totalWidth / 2;
-
+        
+        console.log("rendering hand", this.hand);
         for (let i = 0; i < this.handSize; i++) {
             let cardX = startX+i*(CARD_SIZE+GAP)+CARD_SIZE/2;
             let card = this.hand[i];
@@ -183,7 +223,9 @@ export class Player {
             if (clickable) {
                 card.baseNum.setInteractive();
                 card.baseNum.on('pointerdown', () => {
-                    console.log("Card clicked:", card.getData("value"), card.getData("element"), card.getData("direction"));
+                    // console.log("Card clicked:", card.getData("value"), card.getData("element"), card.getData("direction"));
+                    // console.log("LOOK HERE");
+                    // console.log(card);
                     if (!this.equipped) {
                         this.equipCard(card);
                     } else {

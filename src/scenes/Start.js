@@ -4,10 +4,12 @@ Angela Huang
 
 to-do:
 () [epic][feat] multiplayer!
+    - [fix] sync card hands & equips
     - sync games: fights, turns, powerups
     - esc menu leave game functionality
     - [fix] disable username input box when readied
     - [fix] fix player should disconnect when viewing rules
+() [fix] draw logic in server.js
 () [feat] better win screen
 () add indicator for who's turn it is & which player you are
 () [feat] add in-game instructions for current game stage - roll dice, move your character, pick a card
@@ -122,19 +124,39 @@ export class Start extends Phaser.Scene
         console.log(this.players, this.id);
         for (let i in this.players) {
             if (i == this.id) {
-                this.p1 = new Player(i, this.players[i].username, this.players[i].frog, this, this.players[i].spawn[0], this.players[i].spawn[1], PLAYER_EQUIP_X, SCREEN_MIDDLE_Y, 7);
+                this.p1 = new Player(i, this.players[i].username, this.players[i].frog, this, this.players[i].spawn[0], this.players[i].spawn[1], PLAYER_EQUIP_X, SCREEN_MIDDLE_Y);
             } else {
                 this.p2 = new Player(i, this.players[i].username, this.players[i].frog, this, this.players[i].spawn[0], this.players[i].spawn[1], COMP_EQUIP_X);
             }
         }
         // this.turn = this.p1.id;
         // console.log(this.turn);
+        this.cardsDrawn = 0;
+        Client.socket.on('draw', (info) => {
+            // console.log('Draw card: ', info);
+            if (info.id == this.p1.id) {
+                this.p1.drawCard(info.randomIndex);
+                this.cardsDrawn++;
+                if (this.cardsDrawn == this.p1) {
+                    console.log(this.p1);
+                    console.log(this.p2);
 
-        console.log(this.p1);
-        console.log(this.p2);
+                    this.p1.renderHand(SCREEN_MIDDLE_X,PLAYER_HAND_Y,false);
+                }
+            } else {
+                this.p2.drawCard(info.randomIndex);
+            }
+        });
 
-        this.p1.renderHand(SCREEN_MIDDLE_X,PLAYER_HAND_Y,false);
-        this.p1.renderCollection(SCREEN_MIDDLE_X,PLAYER_COLLECTION_Y,1);
+        for (let i = 0; i < this.p1.handSize; i++) {
+            this.drawCard();
+        }
+
+        // console.log(this.p1);
+        // console.log(this.p2);
+
+        // this.p1.renderHand(SCREEN_MIDDLE_X,PLAYER_HAND_Y,false);
+        // this.p1.renderCollection(SCREEN_MIDDLE_X,PLAYER_COLLECTION_Y,1);
 
         this.fightInProgress = false;
 
@@ -182,9 +204,36 @@ export class Start extends Phaser.Scene
             }
         });
 
-        Client.socket.on('update', (playerData) => {
-            console.log('Player update: ', playerData);
+        Client.socket.on('move', (playerData) => {
+            console.log('Player move: ', playerData);
             this.p2.moveCharacter(playerData.data.x, playerData.data.y);
+        });
+
+        Client.socket.on('fight', (info) => {
+            console.log('Fight with ', info.id);
+            this.spaceElement = info.data.space;
+            this.#startFightScene();
+        });
+
+        Client.socket.on('equip', (info) => {
+            this.p2.equipCardResponse(info.data.card);
+        });
+    }
+
+    drawCard() {
+        console.log("drawing card", {
+            deckLength: this.p1.deck.length,
+            handLength: this.p1.hand.length,
+            handSize: this.p1.handSize,
+        });
+        Client.socket.emit('draw', {
+            id: this.p1.id,
+            otherId: this.p2.id,
+            data: {
+                deckLength: this.p1.deck.length,
+                handLength: this.p1.hand.length,
+                handSize: this.p1.handSize,
+            }
         });
     }
 
@@ -237,8 +286,8 @@ export class Start extends Phaser.Scene
                 this.powerup = null;
             }
 
-            console.log('emitting update');
-            Client.socket.emit('update', {id: this.p1.id, data: {
+            console.log('emitting move');
+            Client.socket.emit('move', {id: this.p1.id, data: {
                 x: x,
                 y: y,
             }, otherId: this.p2.id});
@@ -313,8 +362,9 @@ export class Start extends Phaser.Scene
     }
 
     #startFightScene() {
+        if (this.fightInProgress) return;
+        this.fightInProgress = true;
         // console.log("Fight scene initializing...");
-
         let bgcolours = {
             'fire': "0xEAA",
             'earth': "0xAEA",
@@ -324,6 +374,16 @@ export class Start extends Phaser.Scene
         }
 
         this.cameras.main.setBackgroundColor(bgcolours[this.spaceElement]);
+
+        console.log('emitting fight');
+        Client.socket.emit('fight', {
+            id: this.p1.id,
+            otherId: this.p2.id,
+            data: {
+                space: this.spaceElement,
+                hand: this.p1.hand
+            }
+        });
 
         if (this.powerup) {
             this.powerup.destroy();
@@ -335,10 +395,13 @@ export class Start extends Phaser.Scene
         this.p2.setCharacterVisible(false);
 
         this.p1.renderHand(SCREEN_MIDDLE_X, PLAYER_HAND_Y, true);
+        this.p1.renderCollection(SCREEN_MIDDLE_X,PLAYER_COLLECTION_Y,1);
         this.p2.renderHand(SCREEN_MIDDLE_X, COMP_HAND_Y, false);
         this.p2.renderCollection(SCREEN_MIDDLE_X,COMP_COLLECTION_Y,0);
 
-        this.dice.destroy();
+        if (this.dice) {
+            this.dice.destroy();
+        }
 
         this.info = this.add.image(SCREEN_WIDTH*7/8,SCREEN_HEIGHT*1/4,'info-' + this.spaceElement).setScale(SPACE_SCALE);
     }
@@ -406,13 +469,14 @@ export class Start extends Phaser.Scene
 
     update()
     {
-        if (this.p1.equipped && !this.fightInProgress) {
-            this.fightInProgress = true;
-            this.time.delayedCall(1000,() => {
-                // console.log("opponent picking...");
-                this.p2.equipCard(this.p2.hand[Math.floor(Math.random() * 6)]);
-                this.#triggerFight();
-            },this);
+        if (this.p1.equipped && this.p2.equipped) {
+            // this.fightInProgress = true;
+            // this.time.delayedCall(1000,() => {
+            //     // console.log("opponent picking...");
+            //     this.p2.equipCard(this.p2.hand[Math.floor(Math.random() * 6)]);
+            //     this.#triggerFight();
+            // },this);
+            this.#triggerFight();
         }
 
         // Display mouse coordinates for troubleshooting

@@ -93,10 +93,26 @@ io.on('connection', (socket) => {
             }
         });
 
-        socket.on('update', (playerData) => {
-            // console.log('Player update: ', server.players[playerData.otherId], playerData);
-            server.players[playerData.otherId].socket.emit('update', playerData);
-            // socket.broadcast.emit('update', playerData);
+        socket.on('draw', (info) => {
+            if (info.data.deckLength > 7 && info.data.handLength < info.data.handSize) {
+                const randomIndex = Math.floor(Math.random() * info.data.deckLength-7);
+                server.players[info.id].socket.emit('draw', { randomIndex: randomIndex, id: info.id });
+                server.players[info.otherId].socket.emit('draw', { randomIndex: randomIndex, id: info.id });
+            }
+        });
+
+        socket.on('move', (playerData) => {
+            // console.log('Player move: ', server.players[playerData.otherId], playerData);
+            server.players[playerData.otherId].socket.emit('move', playerData);
+            // socket.broadcast.emit('move', playerData);
+        });
+
+        socket.on('fight', (info) => {
+            server.players[info.otherId].socket.emit('fight', info);
+        });
+
+        socket.on('equip', (info) => {
+            server.players[info.otherId].socket.emit('equip', info);
         });
 
         socket.on('disconnect', () => {
